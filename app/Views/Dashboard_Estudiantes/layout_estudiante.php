@@ -32,7 +32,7 @@
           <a class="nav-link active" aria-current="page" href="<?= base_url('estudiantes/dashboard') ?>">Mi Dashboard</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-danger fw-bold" href="<?= base_url('/') ?>">Cerrar Sesión</a>
+          <a class="nav-link text-danger fw-bold logout-btn" href="<?= base_url('logout') ?>">Cerrar Sesión</a>
         </li>
       </ul>
     </div>
@@ -43,13 +43,21 @@
     <?= $this->renderSection('content') ?>
 </main>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap JS -->
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<script>
+    // Pasa la configuración de PHP a JavaScript para que app.js pueda usarla
+    window.APP_CONFIG = {
+        baseUrl: "<?= base_url('/') ?>",
+        flash: {
+            success: "<?= session()->getFlashdata('success') ?>",
+            error: "<?= session()->getFlashdata('error') ?>"
+        }
+    };
+</script>
+<script src="<?= base_url('app.js'); ?>"></script>
 <?= $this->renderSection('scripts') ?>
 </body>
 </html>

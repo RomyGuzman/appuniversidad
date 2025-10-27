@@ -30,7 +30,7 @@
                 </ul>
             </div>
             <div class="card-footer bg-transparent border-0 text-center">
-                <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
+                <a href="#" id="ver-detalle-profesorado-matematica" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
             </div>
         </div>
     </div>
@@ -45,7 +45,7 @@
                 </ul>
             </div>
             <div class="card-footer bg-transparent border-0 text-center">
-                <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
+                <a href="#" id="ver-detalle-profesorado-ingles" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@
                 </ul>
             </div>
             <div class="card-footer bg-transparent border-0 text-center">
-                <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
+                <a href="#" id="ver-detalle-educacion-inicial" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
             </div>
         </div>
     </div>
@@ -75,7 +75,7 @@
                 </ul>
             </div>
             <div class="card-footer bg-transparent border-0 text-center">
-                <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
+                <a href="#" id="ver-detalle-enfermeria" class="btn btn-outline-primary btn-sm">Ver Detalles</a>
             </div>
         </div>
     </div>

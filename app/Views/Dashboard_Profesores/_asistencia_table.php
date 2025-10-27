@@ -71,7 +71,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initializeAttendanceTable(<?= $materia_id ?>);
+    // Inicializar todas las tablas de asistencia en la página
+    const attendanceContainers = document.querySelectorAll('.attendance-container');
+    attendanceContainers.forEach(container => {
+        const materiaId = container.dataset.materiaId;
+        if (materiaId) {
+            initializeAttendanceTable(parseInt(materiaId));
+        }
+    });
 });
 
 function initializeAttendanceTable(materiaId) {
@@ -527,3 +534,5 @@ function initializeAttendanceTable(materiaId) {
     generateAttendanceTable();
 }
 </script>
+
+

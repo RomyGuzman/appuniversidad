@@ -1,3 +1,4 @@
+.
 <div align="center">
   <img src="https://raw.githubusercontent.com/codeigniter4/CodeIgniter4/develop/public/assets/images/ci-logo-big.png" alt="CodeIgniter 4" width="150">
   <h1>Sistema de Gestión Académica - Instituto 57</h1>

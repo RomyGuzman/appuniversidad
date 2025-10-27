@@ -84,8 +84,10 @@ class EstudianteModel extends Model
      */
     public function getEstudiantesPorCarrera($careerId)
     {
-        // Filtra los estudiantes por la columna 'carrera_id'.
-        return $this->where('carrera_id', $careerId)
+        // Filtra los estudiantes por la columna 'carrera_id' y une con Carrera para obtener el nombre.
+        return $this->select('Estudiante.*, Carrera.nombre_carrera')
+            ->join('Carrera', 'Carrera.id = Estudiante.carrera_id', 'left')
+            ->where('Estudiante.carrera_id', $careerId)
             ->findAll(); // Devuelve todos los estudiantes que coinciden con el filtro.
     }
 

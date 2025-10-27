@@ -33,7 +33,7 @@ class AjaxController extends BaseController
     public function ciencia_datos()
     {
         // La vista no requiere datos de la base de datos, es contenido estático
-        return view('ciencia_datos');
+        return view('Vistas_Dinamicas/ciencia_datos');
     }
 
     /**
@@ -44,7 +44,7 @@ class AjaxController extends BaseController
      */
     public function programacion_web()
     {
-        return view('templates/programacion_web_content');
+        return view('programacion_web_content');
     }
 
     /**
@@ -62,7 +62,7 @@ class AjaxController extends BaseController
      */
     public function profesorado_ingles()
     {
-        return view('profesorado_ingles');
+        return view('Vistas_Dinamicas/profesorado_ingles');
     }
 
     /**
@@ -71,7 +71,7 @@ class AjaxController extends BaseController
      */
     public function profesorado_matematica()
     {
-        return view('profesorado_matematica');
+        return view('Vistas_Dinamicas/profesorado_matematica');
     }
 
     /**
@@ -80,7 +80,7 @@ class AjaxController extends BaseController
      */
     public function educacion_inicial()
     {
-        return view('educacion_inicial');
+        return view('Vistas_Dinamicas/educacion_inicial');
     }
 
     /**
@@ -89,7 +89,7 @@ class AjaxController extends BaseController
      */
     public function enfermeria()
     {
-        return view('enfermeria');
+        return view('Vistas_Dinamicas/enfermeria');
     }
 
     /**
@@ -98,6 +98,6 @@ class AjaxController extends BaseController
      */
     public function seguridad_higiene()
     {
-        return view('seguridad_higiene');
+        return view('Vistas_Dinamicas/seguridad_higiene');
     }
 }

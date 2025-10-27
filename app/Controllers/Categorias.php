@@ -46,8 +46,8 @@ class Categorias extends BaseController
         $model = new CategoriaModel();
         // Recoge los datos del formulario.
         $data = [
-            'nombre_categoria' => $this->request->getPost('nombre_categoria'),
-            'codigo_categoria' => $this->request->getPost('codigo_categoria')
+            'ncat' => $this->request->getPost('ncat'),
+            'codcat' => $this->request->getPost('codcat')
         ];
 
         // Intenta guardar los datos. El modelo se encarga de la validación.
@@ -98,10 +98,11 @@ class Categorias extends BaseController
     public function update($id)
     {
         $model = new CategoriaModel();
-        // Recoge todos los datos del formulario.
-        $data = $this->request->getPost();
-        // Añade el ID a los datos para que la regla de validación 'is_unique' pueda ignorar el registro actual.
-        $data['id'] = $id;
+        // Recoge explícitamente solo los campos necesarios para evitar conflictos.
+        $data = [
+            'ncat' => $this->request->getPost('ncat'),
+            'codcat' => $this->request->getPost('codcat')
+        ];
 
         // Intenta actualizar los datos.
         if ($model->update($id, $data) === false) {

@@ -46,7 +46,7 @@
                             <?= csrf_field() ?>
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nombre Completo</label>
-                                <input type="text" class="form-control" id="name" name="nest" required />
+                                <input type="text" class="form-control" id="name" name="nombre_estudiante" required />
                             </div>
                             <div class="mb-3">
                                 <label for="dni" class="form-label">DNI</label>
@@ -67,7 +67,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="career" class="form-label">Carrera</label>
-                                <select class="form-select" id="career" name="id_car">
+                                <select class="form-select" id="career" name="carrera_id">
                                     <option value="">Seleccione una carrera</option>
                                     <?php if(isset($carreras) && count($carreras) > 0): ?>
                                         <?php foreach($carreras as $car): ?>
@@ -114,8 +114,8 @@
                                 <div id="studentDetails" class="mt-3 p-3 border rounded d-none">
                                     <p class="mb-1"><strong>ID:</strong> <span id="detailId"></span></p>
                                     <p class="mb-1"><strong>Nombre:</strong> <span id="detailName"></span></p>
-                                    <p class="mb-1"><strong>Carrera:</strong> <span id="detailCareer"></span></p>
-                                    <p class="mb-0"><strong>Categoría:</strong> <span id="detailCategory"></span></p>
+                                    <p class="mb-1"><strong>DNI:</strong> <span id="detailDni"></span></p>
+                                    <p class="mb-0"><strong>Carrera:</strong> <span id="detailCareer"></span></p>
                                     <button id="clearStudentDetails" class="btn btn-sm btn-outline-secondary mt-3"><i class="fas fa-times me-1"></i> Limpiar</button>
                                 </div>
                             </div>
@@ -234,7 +234,7 @@
                         <input type="hidden" name="id" id="edit_id">
                         <div class="mb-3">
                             <label for="edit_nest" class="form-label">Nombre Completo</label>
-                            <input type="text" class="form-control" id="edit_nest" name="nest" required>
+                            <input type="text" class="form-control" id="edit_nest" name="nombre_estudiante" required>
                         </div>
                         <div class="mb-3">
                             <label for="edit_dni" class="form-label">DNI</label>
@@ -253,8 +253,8 @@
                             <input type="date" class="form-control" id="edit_fecha_nac" name="fecha_nac">
                         </div>
                         <div class="mb-3">
-                            <label for="edit_id_car" class="form-label">Carrera</label>
-                            <select class="form-select" id="edit_id_car" name="id_car">
+                            <label for="edit_carrera_id" class="form-label">Carrera</label>
+                            <select class="form-select" id="edit_carrera_id" name="carrera_id">
                                 <option value="">Seleccione una carrera</option>
                                 <?php if(isset($carreras) && count($carreras) > 0): ?>
                                     <?php foreach($carreras as $car): ?>

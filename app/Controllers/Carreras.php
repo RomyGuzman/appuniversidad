@@ -7,6 +7,6 @@ class Carreras extends Controller
 {
     public function ciencia_datos()
     {
-        return view('ciencia_datos');
+        return view('vistas_dinamicas/ciencia_datos');
     }
 }

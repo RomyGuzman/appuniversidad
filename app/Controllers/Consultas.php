@@ -23,48 +23,23 @@ class Consultas extends BaseController
         // Obtener datos del formulario
         $asunto = $this->request->getPost('asunto');
         $mensaje = $this->request->getPost('mensaje');
-        $usuario_id = $this->request->getPost('usuario_id'); // ID del estudiante o profesor
+        
+        // Obtener datos de la sesión
+        $session = session();
+        $usuario_id = $session->get('id_usuario');
+        $rol_id = $session->get('rol_id');
+        $email = $session->get('email'); // Asumiendo que el email está en la sesión
 
         // Validar datos básicos
-        if (empty($asunto) || empty($mensaje) || empty($usuario_id)) {
+        if (empty($asunto) || empty($mensaje) || empty($usuario_id) || empty($rol_id)) {
             return redirect()->back()->with('error', 'Todos los campos son obligatorios.');
-        }
-
-        // Obtener información del usuario (estudiante o profesor)
-        $db = \Config\Database::connect();
-        $usuario = null;
-
-        // Intentar buscar en Estudiante
-        $estudiante = $db->table('Estudiante')->where('id', $usuario_id)->get()->getRow();
-        if ($estudiante) {
-            $usuario = [
-                'tipo' => 'estudiante',
-                'id' => $estudiante->id,
-                'nombre' => $estudiante->nombre_estudiante,
-                'email' => $estudiante->email,
-                'dni' => $estudiante->dni
-            ];
-        } else {
-            // Intentar buscar en Profesor
-            $profesor = $db->table('Profesor')->where('id', $usuario_id)->get()->getRow();
-            if ($profesor) {
-                $usuario = [
-                    'tipo' => 'profesor',
-                    'id' => $profesor->id,
-                    'nombre' => $profesor->nombre_profesor,
-                    'email' => 'profesor@universidad.com', // Asumir email genérico o buscar en otra tabla
-                    'dni' => $profesor->legajo
-                ];
-            }
-        }
-
-        if (!$usuario) {
-            return redirect()->back()->with('error', 'Usuario no encontrado.');
         }
 
         // Preparar datos para insertar en consultas_admin
         $data = [
-            'email_usuario' => $usuario['email'],
+            'email_usuario' => $email ?? 'no-email@sistema.com', // Usar el email de la sesión
+            'usuario_id' => $usuario_id,
+            'rol_id' => $rol_id,
             'mensaje' => $mensaje,
             'asunto' => $asunto,
             'estado' => 'pendiente',
@@ -72,7 +47,7 @@ class Consultas extends BaseController
         ];
 
         // Insertar en la base de datos
-        $builder = $db->table('consultas_admin');
+        $builder = \Config\Database::connect()->table('consultas_admin');
         if ($builder->insert($data)) {
             return redirect()->back()->with('success', 'Consulta enviada correctamente. El administrador la revisará pronto.');
         } else {
