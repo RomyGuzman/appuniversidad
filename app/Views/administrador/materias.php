@@ -69,7 +69,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="codigo_materia" class="form-label">Código de la Materia</label>
-                                <input type="text" class="form-control" id="codigo_materia" name="codigo_materia" required />
+                                <input type="text" class="form-control" id="codigo_materia" name="codigo_materia" placeholder="Se generará automáticamente" readonly />
                             </div>
                             <div class="d-flex justify-content-end mt-4">
                                 <button type="submit" class="btn btn-success">

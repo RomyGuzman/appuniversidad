@@ -38,4 +38,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], static functio
     $routes->get('categorias/delete/(:num)', 'Categorias::delete/$1');
     $routes->get('categorias/search/(:num)', 'Categorias::search/$1');
 
+    // --- Rutas para el Sistema de Alertas ---
+    $routes->get('alertas', 'ConsultasAdmin::index');
+    $routes->get('alertas/count', 'ConsultasAdmin::getUnreadCount');
+    $routes->post('alertas/mark-as-read/(:num)', 'ConsultasAdmin::markAsRead/$1');
+
 });

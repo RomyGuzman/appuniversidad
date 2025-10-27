@@ -217,8 +217,24 @@ class Profesores extends BaseController
      */
     public function dashboard()
     {
-        // Por ahora, usar profesor con ID 1. En el futuro, usar sesión.
-        $id_prof = 1;
+        $session = session();
+        $id_prof = $session->get('id_usuario');
+        $rol_id = $session->get('rol_id');
+
+        // 1. Verificar si hay sesión activa
+        if (!$id_prof) {
+            return redirect()->to('/login')->with('error', 'Debe iniciar sesión para ver su dashboard.');
+        }
+
+        // 2. Verificar si el rol es correcto (debe ser profesor)
+        if ($rol_id != 2) { // El rol de profesor es 2
+            // Si es un estudiante, lo redirigimos a su propio dashboard.
+            if ($rol_id == 3) { // El rol de estudiante es 3
+                return redirect()->to('estudiantes/dashboard');
+            }
+            // Para cualquier otro rol, lo enviamos al inicio.
+            return redirect()->to('/')->with('error', 'Acceso no autorizado.');
+        }
 
         // Instanciamos los modelos necesarios
         $profesorModel = new ProfesorModel();
@@ -272,8 +288,13 @@ class Profesores extends BaseController
      */
     public function carreras()
     {
-        // Por ahora, usar profesor con ID 1. En el futuro, usar sesión.
-        $id_prof = 1;
+        // Verificamos si el usuario ha iniciado sesión.
+        // La sesión 'id_usuario' corresponde al ID de la tabla 'usuarios'.
+        // Asumimos que para profesores, el id_usuario es el mismo que el id_prof.
+        // Si tu lógica es diferente, ajústalo aquí.
+        if (! $id_prof = session()->get('id_usuario')) {
+            return redirect()->to('/login')->with('error', 'Debe iniciar sesión para ver su dashboard.');
+        }
 
         // Instanciamos los modelos necesarios
         $profesorModel = new ProfesorModel();

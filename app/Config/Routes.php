@@ -4,7 +4,7 @@ namespace Config;
 
 $routes = Services::routes();
 
-$routes->get('ajax/test', 'Ajax::test');
+
 
 $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Home');
@@ -21,7 +21,12 @@ use CodeIgniter\Router\RouteCollection;
 // --- RUTAS PRINCIPALES DE VISTAS ---
 // Estas rutas se encargan de mostrar las páginas principales de cada módulo.
 $routes->get('/', 'Home::index'); // Muestra la página de inicio institucional.
-$routes->get('/home/index', 'Home::index');     // Alias para la página de inicio.
+$routes->get('/home/index', 'Home::index'); // Alias para la página de inicio.
+
+// --- RUTAS DE LOGIN (usando el controlador Auth inteligente) ---
+$routes->get('login', 'Auth::login', ['as' => 'login']);
+$routes->post('login', 'Auth::attemptLogin');
+$routes->get('logout', 'Auth::logout', ['as' => 'logout']);
 
 // --- RUTAS PARA CARGA DE CONTENIDO DINÁMICO (AJAX) ---
 // Estas rutas son usadas por JavaScript para cargar el contenido de las carreras dinámicamente.
@@ -43,6 +48,7 @@ $routes->get('acceso/estudiantes', 'Estudiantes::dashboard');
 $routes->get('acceso/profesores', 'Profesores::dashboard');
 
 // --- ESTUDIANTES ---
+$routes->get('estudiantes', 'Estudiantes::index'); // Lista principal de estudiantes
 $routes->get('estudiantes/dashboard', 'Estudiantes::dashboard'); // Dashboard del Estudiante
 $routes->get('profesores/dashboard', 'Profesores::dashboard');   // Dashboard del Profesor
 $routes->post('estudiantes/registrar', 'Estudiantes::registrar');
@@ -107,6 +113,15 @@ $routes->get('administrador/modalidades', 'Modalidades::index');
 $routes->get('administrador/rol', 'Rol::index');
 $routes->get('administrador/materias', 'Materias::index');
 $routes->get('administrador/usuarios', 'Usuarios::index');
+$routes->post('administrador/usuarios', 'Usuarios::registrar');
+$routes->get('administrador/usuarios/edit/(:num)', 'Usuarios::edit/$1');
+$routes->post('administrador/usuarios/update/(:num)', 'Usuarios::update/$1');
+$routes->post('administrador/usuarios/delete/(:num)', 'Usuarios::delete/$1');
+
+// --- RUTAS PARA ALERTAS (CONSULTAS ADMIN) ---
+$routes->get('administrador/alertas', 'ConsultasAdmin::index');
+$routes->get('administrador/alertas/count', 'ConsultasAdmin::getUnreadCount');
+$routes->post('administrador/alertas/mark-as-read/(:num)', 'ConsultasAdmin::markAsRead/$1');
 
 // --- RUTAS CRUD PARA NUEVOS MÓDULOS ---
 $routes->get('rol', 'Rol::index');
@@ -129,6 +144,7 @@ $routes->get('materias/edit/(:num)', 'Materias::edit/$1');
 $routes->post('materias/update/(:num)', 'Materias::update/$1');
 $routes->post('materias/delete/(:num)', 'Materias::delete/$1');
 $routes->get('materias/search/(:num)', 'Materias::search/$1');
+$routes->get('materias/generar-codigo/(:segment)', 'Materias::generarCodigo/$1');
 
 $routes->get('modalidades', 'Modalidades::index');
 $routes->post('modalidades/registrar', 'Modalidades::registrar');

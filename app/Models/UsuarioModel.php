@@ -12,16 +12,13 @@ class UsuarioModel extends Model
     protected $useTimestamps = false;
 
     protected $validationRules = [
-        'usuario' => 'required|min_length[3]|max_length[50]|is_unique[Usuarios.usuario,id,{id}]',
+        'usuario' => 'required|min_length[3]|max_length[50]',
         'password' => 'required|min_length[6]',
         'rol_id' => 'required|integer',
         'activo' => 'permit_empty|in_list[0,1]',
     ];
 
     protected $validationMessages = [
-        'usuario' => [
-            'is_unique' => 'El nombre de usuario ya existe.',
-        ],
         'rol_id' => [
             'integer' => 'El rol debe ser un número entero.',
         ],

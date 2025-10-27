@@ -7,6 +7,7 @@ use App\Controllers\BaseController;
 use App\Models\CarreraModel;
 use App\Models\CategoriaModel;
 use App\Models\ModalidadModel;
+use App\Models\UsuarioModel; // CORRECCIÓN: El modelo correcto es UsuarioModel
 /**
  * (Nombrado 'RegistrarCarrera' pero gestiona todo el CRUD de Carreras).
  * Maneja todas las operaciones para las carreras ofrecidas por el instituto.
@@ -20,7 +21,7 @@ class RegistrarCarrera extends BaseController
      * 1. Carga los modelos de Carrera, Categoría y Modalidad.
      * 2. Obtiene todas las carreras para mostrarlas en la tabla.
      * 3. Obtiene todas las categorías y modalidades para rellenar los menús
-     *    desplegables en los formularios de registro y edición.
+     *    desplegables, y las personas para el campo de director.
      * 4. Pasa todos los datos a la vista 'registrarCarrera.php' para que los muestre.
      * @return string La vista renderizada.
      */
@@ -32,16 +33,20 @@ class RegistrarCarrera extends BaseController
             $carreraModel = new CarreraModel();
             $categoriaModel = new CategoriaModel();
             $modalidadModel = new ModalidadModel();
+            $usuarioModel = new UsuarioModel();
 
             // Prepara el array '$data' para la vista.
-            $data['carreras'] = $carreraModel->findAll();
+            // MEJORA: Usamos el método que trae los nombres de categoría y modalidad en una sola consulta.
+            $data['carreras'] = $carreraModel->getCarrerasCompletas();
             $data['categorias'] = $categoriaModel->findAll();
             $data['modalidades'] = $modalidadModel->findAll();
+            $data['personas'] = $usuarioModel->findAll(); // CORRECCIÓN: Usamos el modelo correcto
         } catch (\Exception $e) {
-            // Si hay error, mostramos la vista con datos vacíos.
+            // Si hay un error (ej: conexión a BD), preparamos los arrays vacíos para evitar errores en la vista.
             $data['carreras'] = [];
             $data['categorias'] = [];
             $data['modalidades'] = [];
+            $data['personas'] = [];
         }
 
         // Carga la vista y le pasa los datos.
@@ -60,22 +65,37 @@ class RegistrarCarrera extends BaseController
     public function registrar()
     {
         $model = new CarreraModel();
-        $nombreCarrera = $this->request->getPost('ncar');
+        $nombreCarrera = $this->request->getPost('nombre_carrera');
 
         // Recoge los datos del formulario.
         $data = [
             'nombre_carrera' => $nombreCarrera,
             // Llama al método privado para generar un código único (ej: "DS-1").
-            'codigo_carrera' => $this->generarCodigoCarrera($nombreCarrera),
-            'categoria_id' => $this->request->getPost('id_cat'),
-            'duracion' => $this->request->getPost('duracion'),
-            'modalidad_id' => $this->request->getPost('id_mod'),
+            'codigo_carrera' => $this->generarCodigoCarrera($nombreCarrera ?? ''),
+            'categoria_id' => $this->request->getPost('id_categoria'),
+            'modalidad_id' => $this->request->getPost('id_modalidad'),
+
         ];
 
         // Intenta guardar los datos. El modelo se encarga de la validación.
         if ($model->save($data) === false) {
-            // Si falla, redirige hacia atrás con los datos y los errores.
-            return redirect()->to('/carreras')->withInput()->with('errors', 'Error al registrar: ' . implode(', ', $model->errors()));
+            // --- CORRECCIÓN ---
+            // Si la validación falla, no solo redirigimos. También debemos recargar
+            // los datos para los desplegables (categorías, modalidades, personas)
+            // para que no aparezcan vacíos al mostrar los errores.
+            $categoriaModel = new CategoriaModel();
+            $modalidadModel = new ModalidadModel();
+            $usuarioModel = new UsuarioModel();
+
+            // Preparamos los datos para la vista, igual que en el método index().
+            $viewData['carreras'] = $model->getCarrerasCompletas();
+            $viewData['categorias'] = $categoriaModel->findAll();
+            $viewData['modalidades'] = $modalidadModel->findAll();
+            $viewData['personas'] = $usuarioModel->findAll();
+            $viewData['errors'] = $model->errors(); // Añadimos los errores de validación.
+
+            // Volvemos a mostrar la vista principal, pero esta vez con los errores.
+            return view('administrador/registrarCarrera', $viewData);
         }
 
         // Si es exitoso, redirige a la lista de carreras con un mensaje de éxito.
@@ -121,17 +141,29 @@ class RegistrarCarrera extends BaseController
         $model = new CarreraModel();
         // Es una mejor práctica definir explícitamente los campos que se pueden actualizar.
         // Esto previene ataques de "Mass Assignment" donde un usuario podría intentar
-        // modificar campos no deseados (como 'codcar').
+        // modificar campos no deseados (como 'codigo_carrera').
         $data = [
-            'nombre_carrera' => $this->request->getPost('ncar'),
-            'categoria_id' => $this->request->getPost('id_cat'),
-            'duracion' => $this->request->getPost('duracion'),
-            'modalidad_id' => $this->request->getPost('id_mod'),
+            'nombre_carrera' => $this->request->getPost('nombre_carrera'),
+            'categoria_id' => $this->request->getPost('id_categoria'),
+            'modalidad_id' => $this->request->getPost('id_modalidad'),
         ];
 
         // Intenta actualizar los datos. El modelo se encarga de la validación.
         if ($model->update($id, $data) === false) {
-            return redirect()->to('/carreras')->withInput()->with('errors', 'Error al actualizar: ' . implode(', ', $model->errors()));
+            // --- CORRECCIÓN ---
+            // Si la validación de la actualización falla, recargamos los datos
+            // para los desplegables para que no aparezcan vacíos al mostrar los errores.
+            $categoriaModel = new CategoriaModel();
+            $modalidadModel = new ModalidadModel();
+            $usuarioModel = new UsuarioModel();
+
+            $viewData['carreras'] = $model->getCarrerasCompletas();
+            $viewData['categorias'] = $categoriaModel->findAll();
+            $viewData['modalidades'] = $modalidadModel->findAll();
+            $viewData['personas'] = $usuarioModel->findAll();
+            $viewData['errors'] = $model->errors(); // Añadimos los errores de validación.
+
+            return view('administrador/registrarCarrera', $viewData);
         }
 
         // Si es exitoso, redirige con un mensaje de éxito.
@@ -188,12 +220,15 @@ class RegistrarCarrera extends BaseController
     /**
      * Genera un código único para una carrera basado en su nombre.
      * Ejemplo: "Desarrollo de Software" -> "DS-1", "DS-2", etc.
-     * @param string $nombreCarrera El nombre de la carrera.
+     * @param ?string $nombreCarrera El nombre de la carrera.
      * @return string El código generado.
      */
-    private function generarCodigoCarrera(string $nombreCarrera): string
+    private function generarCodigoCarrera(?string $nombreCarrera = ''): string
     {
         $model = new CarreraModel();
+
+        // Asegurar que sea string
+        $nombreCarrera = (string) $nombreCarrera;
 
         // Paso 1: Crear un acrónimo a partir de las iniciales del nombre de la carrera.
         $palabras = explode(' ', $nombreCarrera);

@@ -40,11 +40,11 @@
                             <?= csrf_field() ?>
                             <div class="mb-3">
                                 <label for="usuario" class="form-label">Nombre de Usuario</label>
-                                <input type="text" class="form-control" id="usuario" name="usuario" required />
+                                <input type="text" class="form-control" id="usuario" name="usuario" required readonly onfocus="this.removeAttribute('readonly');" />
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" name="password" required />
+                                <input type="password" class="form-control" id="password" name="password" required readonly onfocus="this.removeAttribute('readonly');" />
                             </div>
                             <div class="mb-3">
                                 <label for="rol_id" class="form-label">Rol</label>

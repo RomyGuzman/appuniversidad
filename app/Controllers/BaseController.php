@@ -34,7 +34,7 @@ abstract class BaseController extends Controller
      * que herede de BaseController. Los helpers son colecciones de funciones globales.
      * @var list<string>
      */
-    protected $helpers = []; // Puedes agregar helpers aquí, por ejemplo: ['url', 'form'] (para que )
+    protected $helpers = ['url']; // Puedes agregar helpers aquí, por ejemplo: ['url', 'form'] (para que )
                                 // estén disponibles en todos los controladores.
                                 //helpers son colecciones de funciones globales.
     /**

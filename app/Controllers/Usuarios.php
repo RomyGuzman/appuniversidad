@@ -27,12 +27,22 @@ class Usuarios extends BaseController
     {
         $data = [
             'usuario' => $this->request->getPost('usuario'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+          // Usando md5() para ser consistente con el sistema de login.
+            'password' => md5($this->request->getPost('password')),
             'rol_id' => $this->request->getPost('rol_id'),
             'activo' => $this->request->getPost('activo') ? 1 : 0,
         ];
 
+        // Verificar si el usuario ya existe
+        $existingUser = $this->usuarioModel->where('usuario', $data['usuario'])->first();
+        if ($existingUser) {
+            return redirect()->back()->withInput()->with('errors', ['usuario' => 'El nombre de usuario ya existe.']);
+        }
+
         if ($this->usuarioModel->insert($data)) {
+            // SOLUCIÓN DEFINITIVA: Limpiamos explícitamente los datos del formulario de la sesión
+            // antes de redirigir. Esto garantiza que el formulario siempre estará vacío.
+            session()->remove('_ci_old_input');
             return redirect()->to('/administrador/usuarios')->with('success', 'Usuario registrado exitosamente.');
         } else {
             return redirect()->back()->withInput()->with('errors', $this->usuarioModel->errors());
@@ -56,9 +66,25 @@ class Usuarios extends BaseController
             'activo' => $this->request->getPost('activo') ? 1 : 0,
         ];
 
+        // Obtener el usuario actual
+        $currentUser = $this->usuarioModel->find($id);
+        if (!$currentUser) {
+            return redirect()->back()->with('error', 'Usuario no encontrado.');
+        }
+
+        // Verificar si el nombre de usuario ha cambiado
+        if ($currentUser['usuario'] != $data['usuario']) {
+            // Si cambió, verificar si el nuevo nombre de usuario ya existe
+            $existingUser = $this->usuarioModel->where('usuario', $data['usuario'])->first();
+            if ($existingUser) {
+                return redirect()->back()->withInput()->with('errors', ['usuario' => 'El nombre de usuario ya existe.']);
+            }
+        }
+
         $password = $this->request->getPost('password');
         if (!empty($password)) {
-            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+            // Si se actualiza la contraseña, también usamos md5().
+            $data['password'] = md5($password);
         }
 
         if ($this->usuarioModel->update($id, $data)) {

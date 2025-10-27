@@ -2,11 +2,13 @@
 <?php
 $session = session();
 $usuario = $session->get('usuario'); // puede ser el email o nombre según tu implementación
+$id_usuario = $session->get('id_usuario');
+$rol_id = $session->get('rol_id');
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top" id="mainNav">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#" id="logo-exit-link-estudiante">
+        <a class="navbar-brand d-flex align-items-center" href="<?= base_url() ?>">
             <i class="fas fa-university me-2"></i>
             <span>Instituto Superior 57</span>
         </a>
@@ -55,9 +57,15 @@ $usuario = $session->get('usuario'); // puede ser el email o nombre según tu im
                             <i class="fas fa-user-circle me-1"></i> <?= esc($usuario) ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="usuarioMenu">
-                            <li><a class="dropdown-item" href="<?= base_url('perfil'); ?>">Mi Perfil</a></li>
+                            <?php if (in_array($rol_id, [1, 4])): // Admin y Superadmin ?>
+                                <li><a class="dropdown-item" href="<?= base_url('administrador/usuarios'); ?>">Panel Administrador</a></li>
+                            <?php elseif ($rol_id == 2): // Profesor ?>
+                                <li><a class="dropdown-item" href="<?= base_url('profesores/dashboard'); ?>">Mi Dashboard</a></li>
+                            <?php elseif ($rol_id == 3): // Estudiante ?>
+                                <li><a class="dropdown-item" href="<?= base_url('estudiantes/dashboard'); ?>">Mi Dashboard</a></li>
+                            <?php endif; ?>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger fw-bold" href="<?= base_url('logout'); ?>">
+                            <li><a class="dropdown-item text-danger fw-bold logout-btn" href="<?= base_url('logout'); ?>">
                                 <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
                             </a></li>
                         </ul>
