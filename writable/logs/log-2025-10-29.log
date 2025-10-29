@@ -1,0 +1,3 @@
+INFO - 2025-10-29 00:03:10 --> CSRF token verified.
+DEBUG - 2025-10-29 00:03:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-10-29 00:03:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
