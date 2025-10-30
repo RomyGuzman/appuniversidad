@@ -15,7 +15,7 @@ class CategoriaModel extends Model
     // Especifica el nombre de la columna que es la clave primaria de la tabla.
     protected $primaryKey = 'id';
     // Define los campos que se pueden insertar o actualizar masivamente.
-    protected $allowedFields = ['codigo_categoria', 'nombre_categoria'];
+    protected $allowedFields = ['codigo_categoria', 'nombre_categoria', 'carrera_id'];
     // Desactiva los campos de timestamp automáticos ('created_at', 'updated_at').
     protected $useTimestamps = false;
 
