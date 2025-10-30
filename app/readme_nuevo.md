@@ -12,7 +12,7 @@
 El sistema ofrece una interfaz de usuario moderna y dinámica, enfocada en la usabilidad y la eficiencia.
 
 -   **Gestión CRUD Completa:**
-    -   Administración de **Estudiantes**.
+    -   Administración de **Estudiantes**..
     -   Administración de **Carreras**.
     -   Administración de **Categorías** de carreras.
 -   **Interfaz Dinámica (AJAX):**
