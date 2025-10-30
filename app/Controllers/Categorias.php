@@ -46,13 +46,13 @@ class Categorias extends BaseController
         $model = new CategoriaModel();
         // Recoge los datos del formulario.
         $data = [
-            'ncat' => $this->request->getPost('ncat'),
-            'codcat' => $this->request->getPost('codcat')
+            'nombre_categoria' => $this->request->getPost('nombre_categoria'),
+            'codigo_categoria' => $this->request->getPost('codigo_categoria')
         ];
 
         // Intenta guardar los datos. El modelo se encarga de la validación.
         if ($model->save($data) === false) {
-            return redirect()->to('/categorias')->withInput()->with('errors', 'Error al registrar: ' . implode(', ', $model->errors()));
+            return redirect()->to('/categorias')->withInput()->with('errors', $model->errors());
         }
 
         // Si es exitoso, redirige con un mensaje de éxito.
@@ -100,13 +100,13 @@ class Categorias extends BaseController
         $model = new CategoriaModel();
         // Recoge explícitamente solo los campos necesarios para evitar conflictos.
         $data = [
-            'ncat' => $this->request->getPost('ncat'),
-            'codcat' => $this->request->getPost('codcat')
+            'nombre_categoria' => $this->request->getPost('nombre_categoria'),
+            'codigo_categoria' => $this->request->getPost('codigo_categoria')
         ];
 
         // Intenta actualizar los datos.
         if ($model->update($id, $data) === false) {
-            return redirect()->to('/categorias')->withInput()->with('errors', 'Error al actualizar: ' . implode(', ', $model->errors()));
+            return redirect()->to('/categorias')->withInput()->with('errors', $model->errors());
         }
 
         // Si es exitoso, redirige con un mensaje de éxito.

@@ -1,17 +1,12 @@
-<?php
-/*
- * Esta es la plantilla principal (layout) para el SITIO PÚBLICO.
- * Define la estructura HTML común que envuelve el contenido de las páginas públicas.
- */
-?>
-
 <?= $this->include('templates/head') ?>
 
 <body>
 
     <?= $this->include('templates/Navbar') ?>
 
-    <?= $this->include('templates/header_content') ?>
+    <?php if (!isset($show_header) || $show_header): ?>
+        <?= $this->include('templates/header_content') ?>
+    <?php endif; ?>
 
     <main>
         <?php if (isset($page_content)) : ?>
