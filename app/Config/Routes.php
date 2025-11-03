@@ -155,6 +155,10 @@ $routes->get('modalidades/search/(:num)', 'Modalidades::search/$1');
 
 // --- RUTAS PARA CONSULTAS ---
 $routes->post('consultas/enviar', 'Consultas::enviar');
+$routes->post('contacto/enviar', 'ContactoController::enviarConsulta');
+$routes->post('consultas/enviar', 'Consultas::enviarConsulta');
+
+
 
 // ---- RUTAS PARA FORMULARIO DE REGISTRO
 $routes->get('registro', 'RegistroController::index');

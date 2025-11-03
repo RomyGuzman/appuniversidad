@@ -2,56 +2,50 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
+use App\Models\ConsultaAdminModel;
+use CodeIgniter\Controller;
 
-/**
- * Controlador para manejar las consultas de estudiantes y profesores al administrador.
- */
-class Consultas extends BaseController
+class Consultas extends Controller
 {
-    /**
-     * Método para enviar una consulta desde el dashboard de estudiante o profesor.
-     * Guarda la consulta en la base de datos con los datos del usuario y la sesión.
-     */
     public function enviar()
     {
-        // Validar que sea una petición POST
-        if (!$this->request->is('post')) {
-            return redirect()->back()->with('error', 'Método no permitido.');
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'email'   => 'required|valid_email',
+            'asunto'  => 'required|max_length[80]',
+            'mensaje' => 'required|max_length[300]',
+        ]);
+
+        if (!$this->validate($validation->getRules())) {
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Datos inválidos.',
+                'errors'  => $validation->getErrors()
+            ]);
         }
 
-        // Obtener datos del formulario
-        $asunto = $this->request->getPost('asunto');
-        $mensaje = $this->request->getPost('mensaje');
-        
-        // Obtener datos de la sesión
-        $session = session();
-        $usuario_id = $session->get('id_usuario');
-        $rol_id = $session->get('rol_id');
-        $email = $session->get('email'); // Asumiendo que el email está en la sesión
+        $model = new ConsultaAdminModel();
 
-        // Validar datos básicos
-        if (empty($asunto) || empty($mensaje) || empty($usuario_id) || empty($rol_id)) {
-            return redirect()->back()->with('error', 'Todos los campos son obligatorios.');
-        }
-
-        // Preparar datos para insertar en consultas_admin
         $data = [
-            'email_usuario' => $email ?? 'no-email@sistema.com', // Usar el email de la sesión
-            'usuario_id' => $usuario_id,
-            'rol_id' => $rol_id,
-            'mensaje' => $mensaje,
-            'asunto' => $asunto,
-            'estado' => 'pendiente',
-            'fecha_creacion' => date('Y-m-d H:i:s')
+            'email_usuario' => $this->request->getPost('email'),
+            'asunto'        => $this->request->getPost('asunto'),
+            'mensaje'       => $this->request->getPost('mensaje'),
+            'estado'        => 'pendiente'
         ];
 
-        // Insertar en la base de datos
-        $builder = \Config\Database::connect()->table('consultas_admin');
-        if ($builder->insert($data)) {
-            return redirect()->back()->with('success', 'Consulta enviada correctamente. El administrador la revisará pronto.');
-        } else {
-            return redirect()->back()->with('error', 'Error al enviar la consulta. Inténtalo de nuevo.');
-        }
+        if ($model->insert($data)) {
+           return $this->response->setJSON([
+    'success' => true,
+    'message' => 'El administrador se contactará al e-mail proporcionado',
+    'csrf_token' => csrf_hash()
+            ]);
+        
+    return $this->response->setJSON([
+    'success' => false,
+    'message' => 'Error al guardar la consulta',
+    'csrf_token' => csrf_hash()
+]);
+}
     }
 }
+
