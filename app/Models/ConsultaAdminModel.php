@@ -7,8 +7,8 @@ class ConsultaAdminModel extends Model
 {
     protected $table = 'consultas_admin';
     protected $primaryKey = 'id_consulta';
-    protected $allowedFields = ['email_usuario', 'usuario_id', 'rol_id', 'mensaje', 'asunto', 'estado', 'fecha_creacion'];
-
+    protected $allowedFields = ['email_usuario', 'mensaje', 'estado', 'asunto'];
+    
     /**
      * Obtiene las consultas paginadas con la información del remitente.
      * Esta es la forma más eficiente de obtener los datos.
@@ -26,14 +26,14 @@ class ConsultaAdminModel extends Model
             r.nombre_rol,
             COALESCE(e.nombre_estudiante, p.nombre_profesor) as nombre_remitente
         ');
+
         $builder->join('roles r', 'r.id = c.rol_id', 'left');
-        $builder->join('estudiante e', 'e.id = c.usuario_id AND c.rol_id = 3', 'left'); // rol_id = 3 para Estudiante
-        $builder->join('profesores p', 'p.id = c.usuario_id AND c.rol_id = 2', 'left');   // rol_id = 2 para Profesor
-        
-        // Ordena para mostrar las pendientes primero
+        $builder->join('estudiante e', 'e.id = c.usuario_id AND c.rol_id = 3', 'left');
+        $builder->join('profesores p', 'p.id = c.usuario_id AND c.rol_id = 2', 'left');
+
         $builder->orderBy('c.estado', 'ASC');
         $builder->orderBy('c.fecha_creacion', 'DESC');
 
-        return $this->paginate($perPage);
+        return $builder->get($perPage)->getResult();
     }
 }

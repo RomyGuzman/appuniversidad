@@ -3,7 +3,9 @@
 // Esto previene errores al intentar manipular elementos que aún no existen.
 
 // --- INICIO: Inicialización de DataTables ---
-$('#careersTable').DataTable();
+if ($.fn.DataTable) {
+    $('#careersTable').DataTable();
+}
 // --- FIN: Inicialización de DataTables ---
 
 $(document).ready(function () {
@@ -494,6 +496,7 @@ $(document).ready(function () {
     // Función genérica para manejar el clic y la carga de contenido
     function handleCareerLinkClick(e, url) {
         e.preventDefault();
+        console.log('Evento clic capturado para URL:', url);
 
         // Cierra el menú desplegable
         var dropdownElement = document.getElementById('navbarDropdownOfertaAcademica');
@@ -515,19 +518,12 @@ $(document).ready(function () {
     // Este enfoque es más claro, robusto y fácil de depurar que un manejador genérico.
 
     $('body').on('click', '#ciencia-datos-link, #ver-detalle-ciencia-datos', e => handleCareerLinkClick(e, 'ajax/ciencia_datos'));
-
     $('body').on('click', '#profesorado-matematica-link, #ver-detalle-profesorado-matematica', e => handleCareerLinkClick(e, 'ajax/profesorado_matematica'));
-
     $('body').on('click', '#programacion-web-link, #ver-detalle-programacion-web', e => handleCareerLinkClick(e, 'ajax/programacion_web'));
-
     $('body').on('click', '#profesorado-ingles-link, #ver-detalle-profesorado-ingles', e => handleCareerLinkClick(e, 'ajax/profesorado_ingles'));
-
     $('body').on('click', '#educacion-inicial-link, #ver-detalle-educacion-inicial', e => handleCareerLinkClick(e, 'ajax/educacion_inicial'));
-
     $('body').on('click', '#enfermeria-link, #ver-detalle-enfermeria', e => handleCareerLinkClick(e, 'ajax/enfermeria'));
-
     $('body').on('click', '#seguridad-higiene-link, #ver-detalle-seguridad-higiene', e => handleCareerLinkClick(e, 'ajax/seguridad_higiene'));
-
     // Evento para el botón "Volver" que hace scroll suave hacia la parte superior de la página.
     $('body').on('click', '#volver-oferta-default', function(e) {
         e.preventDefault();
@@ -543,8 +539,9 @@ $(document).ready(function () {
      */
 
     // Función reutilizable para cargar contenido vía AJAX
-    function cargarContenidoCarrera(url, containerSelector = '#careers') {
+    function cargarContenidoCarrera(url, containerSelector = '#oferta-academica-content') {
         const contentContainer = $(containerSelector);
+        console.log('Cargando contenido en:', containerSelector, 'URL:', url);
 
         // Añadimos una clase para dar feedback visual inmediato (cambia el fondo)
         contentContainer.addClass('loading-content');
@@ -556,6 +553,7 @@ $(document).ready(function () {
                 url: `${BASE_URL}${url}`, // CORRECCIÓN: Usamos la URL base para asegurar que la ruta sea siempre correcta.
                 type: 'GET',
                 success: function(response) {
+                    console.log('Respuesta AJAX exitosa:', response.substring(0, 100) + '...');
                     let finalHtml = response;
 
                     // Si la URL no es la de la vista por defecto, añadimos el botón "Volver".
@@ -575,7 +573,8 @@ $(document).ready(function () {
                     // Re-inicializa las animaciones de AOS para el nuevo contenido
                     AOS.init({ once: true }); // Usamos 'once: true' para que la animación ocurra solo una vez por carga.
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Error AJAX:', xhr.status, xhr.responseText, status, error);
                     contentContainer.html('<p class="text-center text-danger">Error al cargar el contenido.</p>').removeClass('loading-content').fadeIn(300);
                 }
             });

@@ -4,8 +4,8 @@
         <div class="row">
             <div class="col-lg-8 mx-auto hero-content text-center" data-aos="fade-up" data-aos-duration="1000">
                 <span class="badge-career mb-3">Resolución 2730/22</span>
-                <h1 class="display-4 fw-bold mb-3">Tecnicatura Superior en Ciencia de Datos e Inteligencia Artificial</h1>
-                <p class="lead mb-4">Formá parte de la revolución tecnológica. Aprendé a transformar datos en decisiones estratégicas y desarrollá soluciones inteligentes para los desafíos del futuro.</p>
+                <h1 class="display-4 fw-bold mb-3"><?php echo esc($titulo ?? 'Tecnicatura Superior en Ciencia de Datos e Inteligencia Artificial'); ?></h1>
+                <p class="lead mb-4"><?php echo esc($descripcion ?? 'Formá parte de la revolución tecnológica. Aprendé a transformar datos en decisiones estratégicas y desarrollá soluciones inteligentes para los desafíos del futuro.'); ?></p>
                 <div class="d-flex flex-wrap justify-content-center gap-4 mb-4">
                     <div class="d-flex align-items-center text-dark">
                         <i class="fas fa-clock me-2"></i>
@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="mt-4 text-center">
-                    <a href="#inscripcion" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
+                    <a href="registro" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
                     <a href="#plan-estudios" class="btn btn-secondary btn-lg px-4 py-2">Conocé el plan de estudios</a>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800">
-                <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" class="img-fluid img-enhanced" alt="Ciencia de Datos e Inteligencia Artificial">
+                <img src="<?php echo esc($imagen ?? 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); ?>" class="img-fluid img-enhanced" alt="Ciencia de Datos e Inteligencia Artificial">
             </div>
         </div>
     </div>
