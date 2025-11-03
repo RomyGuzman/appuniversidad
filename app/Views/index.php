@@ -148,30 +148,90 @@
         </section>
 
         <section id="contact" class="py-5 bg-light-gray">
-            <div class="container">
-                <h2 class="display-5 fw-bold text-center mb-5 text-primary">Contáctanos</h2>
-                <div class="row">
-                    <div class="col-lg-6 mb-4 mb-lg-0">
-                        <h4 class="fw-bold mb-3">Envíanos un Mensaje</h4>
-                        <form>
-                            <div class="mb-3">
-                                <label for="contactName" class="form-label">Nombre Completo</label>
-                                <input type="text" class="form-control" id="contactName" placeholder="Tu Nombre">
-                            </div>
-                            <div class="mb-3">
-                                <label for="contactEmail" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="contactEmail" placeholder="tu.email@ejemplo.com">
-                            </div>
-                            <div class="mb-3">
-                                <label for="contactSubject" class="form-label">Asunto</label>
-                                <input type="text" class="form-control" id="contactSubject" placeholder="Motivo de tu consulta">
-                            </div>
-                            <div class="mb-3">
-                                <label for="contactMessage" class="form-label">Mensaje</label>
-                                <textarea class="form-control" id="contactMessage" rows="5" placeholder="Escribe tu mensaje aquí..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-lg">Enviar Mensaje</button>
-                        </form>
+    <div class="container">
+        <h2 class="display-5 fw-bold text-center mb-5 text-primary">Contáctanos</h2>
+        <div class="row">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h4 class="fw-bold mb-3">Envíanos un Mensaje</h4>
+                <form id="contactForm" method="POST">
+
+    <!-- Campo CSRF CORRECTO -->
+   <?= csrf_field() ?>
+
+    <div class="mb-3">
+        <label for="contactName" class="form-label">Nombre Completo</label>
+        <input type="text" class="form-control" id="contactName" name="nombre" placeholder="Tu Nombre" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="contactEmail" class="form-label">Correo Electrónico</label>
+        <input type="email" class="form-control" id="contactEmail" name="email" placeholder="tu.email@ejemplo.com" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="contactSubject" class="form-label">Asunto</label>
+        <input type="text" class="form-control" id="contactSubject" name="asunto" placeholder="Motivo de tu consulta" maxlength="80" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="contactMessage" class="form-label">Mensaje</label>
+        <textarea class="form-control" id="contactMessage" name="mensaje" rows="5" placeholder="Escribe tu mensaje aquí..." maxlength="300" required></textarea>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-lg" id="submitBtn">Enviar Mensaje</button>
+</form>
+
+
+                <!-- Incluye SweetAlert si no está en tu layout -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Script para el formulario -->
+<script>
+document.getElementById('submitBtn').addEventListener('click', function() {
+    const form = document.getElementById('contactForm');
+    const formData = new FormData(form);
+
+    // ✅ Obtener token actual del input
+    const csrfName = form.querySelector('input[type=hidden]').getAttribute('name');
+    const csrfValue = form.querySelector('input[type=hidden]').value;
+
+    formData.append(csrfName, csrfValue);
+
+    fetch('<?= base_url('consultas/enviar') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        // ✅ Actualizar token para el próximo envío
+        form.querySelector('input[type=hidden]').value = data.csrf_token;
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Mensaje enviado',
+                text: data.message
+            });
+            form.reset();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message
+            });
+        }
+    })
+    .catch(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al enviar la consulta.'
+        });
+    });
+});
+
+</script>
                     </div>
                     <div class="col-lg-6">
                         <h4 class="fw-bold mb-3">Encuéntranos</h4>
