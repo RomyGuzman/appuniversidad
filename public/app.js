@@ -13,7 +13,10 @@ $(document).ready(function () {
     if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
     }
-    window.scrollTo(0, 0);
+    // Solo hacer scroll al inicio si no hay hash en la URL (evita scroll automático a secciones)
+    if (!window.location.hash) {
+        window.scrollTo(0, 0);
+    }
 
     console.log('Script cargado'); // Agregado para depuración
     console.log('Elemento #ciencia-datos-link encontrado:', $('#ciencia-datos-link').length);
@@ -491,95 +494,133 @@ $(document).ready(function () {
         });
     }
 
-    // --- Lógica para carga dinámica de carreras en la página de inicio ---
-
-    // Función genérica para manejar el clic y la carga de contenido
-    function handleCareerLinkClick(e, url) {
-        e.preventDefault();
-        console.log('Evento clic capturado para URL:', url);
-
-        // Cierra el menú desplegable
-        var dropdownElement = document.getElementById('navbarDropdownOfertaAcademica');
-        if (dropdownElement) {
-            var dropdownInstance = bootstrap.Dropdown.getInstance(dropdownElement) || new bootstrap.Dropdown(dropdownElement);
-            if (dropdownInstance) {
-                dropdownInstance.hide();
-            }
-        }
-
-        // Scroll suave a la sección y carga del contenido
-        $('html, body').animate({
-            scrollTop: $('#careers').offset().top - 80 // 80px de offset por el navbar
-        }, 800);
-        cargarContenidoCarrera(url);
-    }
-
-    // --- Manejadores de eventos específicos para cada carrera ---
-    // Este enfoque es más claro, robusto y fácil de depurar que un manejador genérico.
-
-    $('body').on('click', '#ciencia-datos-link, #ver-detalle-ciencia-datos', e => handleCareerLinkClick(e, 'ajax/ciencia_datos'));
-    $('body').on('click', '#profesorado-matematica-link, #ver-detalle-profesorado-matematica', e => handleCareerLinkClick(e, 'ajax/profesorado_matematica'));
-    $('body').on('click', '#programacion-web-link, #ver-detalle-programacion-web', e => handleCareerLinkClick(e, 'ajax/programacion_web'));
-    $('body').on('click', '#profesorado-ingles-link, #ver-detalle-profesorado-ingles', e => handleCareerLinkClick(e, 'ajax/profesorado_ingles'));
-    $('body').on('click', '#educacion-inicial-link, #ver-detalle-educacion-inicial', e => handleCareerLinkClick(e, 'ajax/educacion_inicial'));
-    $('body').on('click', '#enfermeria-link, #ver-detalle-enfermeria', e => handleCareerLinkClick(e, 'ajax/enfermeria'));
-    $('body').on('click', '#seguridad-higiene-link, #ver-detalle-seguridad-higiene', e => handleCareerLinkClick(e, 'ajax/seguridad_higiene'));
-    // Evento para el botón "Volver" que hace scroll suave hacia la parte superior de la página.
-    $('body').on('click', '#volver-oferta-default', function(e) {
-        e.preventDefault();
-        $('html, body').animate({
-            scrollTop: 0 // Llevamos la vista al inicio de la página
-        }, 800);
-    });
-
     /**
-     * Función reutilizable para cargar contenido de carreras vía AJAX.
-     * @param {string} url - La URL del controlador AJAX a la que se llamará.
-     * @param {string} containerSelector - Selector del contenedor donde cargar el contenido (opcional).
+     * =================================================================================
+     * LÓGICA UNIFICADA PARA CARGA DINÁMICA DE CONTENIDO (SPA)
+     * =================================================================================
+     * Esta sección maneja la carga de vistas parciales de las carreras sin recargar
+     * la página, creando una experiencia de Single-Page Application.
      */
 
-    // Función reutilizable para cargar contenido vía AJAX
-    function cargarContenidoCarrera(url, containerSelector = '#oferta-academica-content') {
+    /**
+     * Función principal y reutilizable para cargar contenido de carreras vía AJAX.
+     * @param {string} url - La URL relativa del endpoint en AjaxController (ej: 'ajax/ciencia_datos').
+     * @param {string} [containerSelector='#careers'] - El selector del div que se actualizará.
+     */
+    function cargarContenidoCarrera(url, containerSelector = '#careers') {
         const contentContainer = $(containerSelector);
-        console.log('Cargando contenido en:', containerSelector, 'URL:', url);
+        if (contentContainer.length === 0) {
+            console.error('El contenedor para la carga dinámica no fue encontrado:', containerSelector);
+            return;
+        }
 
-        // Añadimos una clase para dar feedback visual inmediato (cambia el fondo)
+        // --- LÓGICA PARA GESTIONAR LA VISIBILIDAD DE "QUIÉNES SOMOS" ---
+        // Si la URL que se carga es la de registro, oculta la sección "Quiénes Somos".
+        // Para cualquier otra URL, se asegura de que esté visible.
+        const aboutSection = $('#about');
+        if (url === 'ajax/registro') {
+            aboutSection.slideUp(200); // Oculta la sección con una animación suave.
+        } else {
+            aboutSection.slideDown(200); // Muestra la sección si estaba oculta.
+        }
+
+        // 1. Añade una clase para feedback visual y hace un fadeOut del contenido actual
         contentContainer.addClass('loading-content');
-
-        // Muestra un efecto de "fade out" en el contenedor actual
         contentContainer.fadeOut(200, function() {
-            // Realiza la petición AJAX
+            // 2. Realiza la petición AJAX
             $.ajax({
-                url: `${BASE_URL}${url}`, // CORRECCIÓN: Usamos la URL base para asegurar que la ruta sea siempre correcta.
+                url: `${BASE_URL}${url}`, // Construye la URL completa usando la variable global
                 type: 'GET',
                 success: function(response) {
-                    console.log('Respuesta AJAX exitosa:', response.substring(0, 100) + '...');
                     let finalHtml = response;
 
-                    // Si la URL no es la de la vista por defecto, añadimos el botón "Volver".
-                    if (url !== 'ajax/oferta_academica_default') {
+                    // 3. Añade un botón "Volver" si no estamos cargando la vista por defecto
+                    //    Y TAMPOCO si estamos en la vista de registro.
+                    if (url !== 'ajax/oferta_academica_default' && url !== 'ajax/registro') {
                         const volverBtnHtml = `
                             <div class="container mt-4 text-center" data-aos="fade-up">
-                                <button id="volver-oferta-default" class="btn btn-secondary btn-lg px-4 py-2">
-                                    <i class="fas fa-arrow-up me-2"></i>Volver Arriba
-                                </button>
+                                <a href="#" id="volver-oferta-default" class="btn btn-secondary btn-lg px-4 py-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Volver a la Oferta Principal
+                                </a>
                             </div>
                         `;
                         finalHtml += volverBtnHtml;
                     }
 
+                    // 4. Inyecta el nuevo HTML y lo muestra con un fadeIn
                     contentContainer.html(finalHtml).removeClass('loading-content').fadeIn(300);
 
-                    // Re-inicializa las animaciones de AOS para el nuevo contenido
-                    AOS.init({ once: true }); // Usamos 'once: true' para que la animación ocurra solo una vez por carga.
+                    // 5. Re-inicializa las animaciones AOS para el nuevo contenido cargado
+                    if (typeof AOS !== 'undefined') {
+                        AOS.init({
+                            once: true
+                        });
+                    }
+
+                    // 6. (NUEVO) Desplaza suavemente la vista hasta el contenedor del nuevo contenido
+                    // Solo se ejecuta si no estamos volviendo a la vista por defecto (para evitar un salto innecesario).
+                    if (url !== 'ajax/oferta_academica_default') {
+                        $('html, body').animate({
+                            scrollTop: contentContainer.offset().top - 80 // Restamos 80px para compensar la altura del navbar
+                        }, 800); // 800ms de duración para un scroll suave
+                    }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error AJAX:', xhr.status, xhr.responseText, status, error);
-                    contentContainer.html('<p class="text-center text-danger">Error al cargar el contenido.</p>').removeClass('loading-content').fadeIn(300);
+                    // 6. En caso de error, muestra un mensaje claro
+                    // ==================================================================
+                    // INICIO: LOG DE DEPURACIÓN PARA VER EL ERROR DEL SERVIDOR
+                    // ==================================================================
+                    console.log('¡ERROR AJAX DETECTADO! La URL solicitada fue:', `${BASE_URL}${url}`);
+                    console.error('Respuesta completa del servidor (esto nos dirá el error exacto):', xhr.responseText);
+                    // ==================================================================
+                    contentContainer.html('<div class="alert alert-danger text-center">Error al cargar el contenido. Por favor, intente de nuevo.</div>').removeClass('loading-content').fadeIn(300);
                 }
             });
         });
     }
+
+    // --- MANEJADORES DE EVENTOS UNIFICADOS ---
+
+    // MANEJADOR UNIFICADO PARA TODA LA NAVEGACIÓN DINÁMICA DE LA OFERTA ACADÉMICA
+    // Este manejador captura clics en:
+    // 1. Enlaces de carreras en el navbar (id termina en "-link").
+    // 2. Botones "Ver detalle" en las tarjetas (id empieza con "ver-detalle-").
+    // 3. Botones "Inscribite ahora" (clase ".btn-inscribir").
+    $('body').on('click', 'a[id$="-link"], a[id^="ver-detalle-"], .btn-inscribir, #volver-oferta-default', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let url;
+        // Si el botón tiene la clase .btn-inscribir, la URL es siempre la de registro.
+        if ($(this).hasClass('btn-inscribir')) {
+            url = 'ajax/registro';
+        // Si es el botón de volver, carga la vista por defecto.
+        } else if (this.id === 'volver-oferta-default') {
+            url = 'ajax/oferta_academica_default';
+        } else {
+            // Si no, es un enlace de carrera. Construimos la URL a partir del ID.
+            // SOLUCIÓN PRECISA:
+            // 1. Limpiamos el ID para obtener el slug base (ej: "ciencia-datos").
+            const slugBase = this.id.replace('-link', '').replace('ver-detalle-', '');
+            // 2. Reemplazamos TODOS los guiones por guiones bajos para que coincida con la ruta.
+            const slugFinal = slugBase.replace(/-/g, '_');
+            url = `ajax/${slugFinal}`; // URL final: "ajax/ciencia_datos"
+        }
+        
+        // Llama a la función de carga con la URL correcta
+        cargarContenidoCarrera(url);
+
+        // Cierra el menú desplegable del navbar en móviles si está abierto
+        $('.navbar-collapse').collapse('hide');
+
+        // =============================================================================
+        // SOLUCIÓN FINAL Y DEFINITIVA (MANIPULACIÓN DIRECTA)
+        // Esto cierra el menú desplegable de "Oferta Académica" en todas las pantallas
+        // forzando la eliminación de las clases y atributos que lo mantienen abierto.
+        // =============================================================================
+        $('.dropdown-menu.show').removeClass('show');
+        $('.dropdown-toggle[aria-expanded="true"]').attr('aria-expanded', 'false');
+    });
 
     // Comprueba si existen mensajes "flash" de éxito o error pasados desde el controlador PHP.
     // Estos mensajes se usan para notificar al usuario el resultado de una acción (ej: "Estudiante registrado").

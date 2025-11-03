@@ -4,8 +4,8 @@
         <div class="row">
             <div class="col-lg-8 mx-auto hero-content text-center" data-aos="fade-up" data-aos-duration="1000">
                 <span class="badge-career mb-3">Resolución 2730/22</span>
-                <h1 class="display-4 fw-bold mb-3"><?php echo esc($titulo ?? 'Tecnicatura Superior en Ciencia de Datos e Inteligencia Artificial'); ?></h1>
-                <p class="lead mb-4"><?php echo esc($descripcion ?? 'Formá parte de la revolución tecnológica. Aprendé a transformar datos en decisiones estratégicas y desarrollá soluciones inteligentes para los desafíos del futuro.'); ?></p>
+                <h1 class="display-4 fw-bold mb-3"><?php echo htmlspecialchars($titulo ?? 'Tecnicatura Superior en Ciencia de Datos e Inteligencia Artificial'); ?></h1>
+                <p class="lead mb-4"><?php echo htmlspecialchars($descripcion ?? 'Formá parte de la revolución tecnológica. Aprendé a transformar datos en decisiones estratégicas y desarrollá soluciones inteligentes para los desafíos del futuro.'); ?></p>
                 <div class="d-flex flex-wrap justify-content-center gap-4 mb-4">
                     <div class="d-flex align-items-center text-dark">
                         <i class="fas fa-clock me-2"></i>
@@ -21,7 +21,8 @@
                     </div>
                 </div>
                 <div class="mt-4 text-center">
-                    <a href="#inscripcion" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
+                    <!-- CORRECCIÓN: Se usa la clase .btn-inscribir para la carga dinámica del formulario -->
+                    <a href="<?= base_url('registro') ?>" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
                     <a href="#plan-estudios" class="btn btn-secondary btn-lg px-4 py-2">Conocé el plan de estudios</a>
                 </div>
             </div>
@@ -51,7 +52,7 @@
                 </div>
             </div>
             <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800">
-                <img src="<?php echo esc($imagen ?? 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); ?>" class="img-fluid img-enhanced" alt="Ciencia de Datos e Inteligencia Artificial">
+                <img src="<?php echo htmlspecialchars($imagen ?? 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); ?>" class="img-fluid img-enhanced" alt="Ciencia de Datos e Inteligencia Artificial">
             </div>
         </div>
     </div>
@@ -210,7 +211,7 @@
         </div>
 
         <div class="text-center mt-5" data-aos="fade-up">
-            <a href="#" class="btn btn-primary btn-lg px-4 py-2">
+            <a href="#!" class="btn btn-primary btn-lg px-4 py-2 btn-descargar-plan">
                 <i class="fas fa-download me-2"></i>Descargar plan de estudios completo
             </a>
         </div>
@@ -363,7 +364,7 @@
                             <i class="fas fa-calendar-check fa-2x mb-3"></i>
                             <h4>Inscripción 2024</h4>
                             <p class="mb-3">Abierta hasta el 15 de marzo</p>
-                            <a href="#" class="btn btn-light">Inscribite online</a>
+                            <a href="<?= base_url('registro') ?>" class="btn btn-light">Inscribite online</a>
                         </div>
                     </div>
 

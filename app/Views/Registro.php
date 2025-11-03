@@ -126,22 +126,23 @@
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('carrera').addEventListener('change', function() {
         const carreraId = this.value;
         // Cargar modalidades
-        fetch(`<?= base_url('registro/get-modalidades') ?>/${carreraId}`)
+        fetch(`<?= base_url('registro/getModalidades') ?>/${carreraId}`)
             .then(response => response.json())
             .then(data => {
                 const select = document.getElementById('modalidad');
                 select.innerHTML = '<option value="">Selecciona una modalidad</option>';
                 data.forEach(item => {
-                    select.innerHTML += `<option value="${item.id}">${item.nombre_modalidad}</option>`;
+                    select.innerHTML += `<option value="${item.id}">${item.nombre_modalidad}</option>`; // nombre_modalidad es correcto
                 });
             })
             .catch(error => console.error('Error cargando modalidades:', error));
         // Cargar categorías
-        fetch(`<?= base_url('registro/get-categorias') ?>/${carreraId}`)
+        fetch(`<?= base_url('registro/getCategorias') ?>/${carreraId}`)
             .then(response => response.json())
             .then(data => {
                 const select = document.getElementById('categoria');
@@ -152,5 +153,14 @@
             })
             .catch(error => console.error('Error cargando categorías:', error));
     });
+
+    <?php if (session()->has('registro_exitoso') && session('registro_exitoso')): ?>
+        Swal.fire({
+            title: 'Registro Exitoso',
+            text: 'Tu usuario de inicio de sesión es <?= session('email') ?> y tu contraseña es <?= session('dni') ?>',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
+    <?php endif; ?>
 </script>
 <?= $this->endSection() ?>

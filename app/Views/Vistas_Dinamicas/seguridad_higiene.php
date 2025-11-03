@@ -21,7 +21,8 @@
                     </div>
                 </div>
                 <div class="mt-4 text-center">
-                    <a href="#inscripcion" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
+                    <!-- CORRECCIÓN: Se usa la clase .btn-inscribir para la carga dinámica del formulario -->
+                    <a href="<?= base_url('registro') ?>" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
                     <a href="#plan-estudios" class="btn btn-secondary btn-lg px-4 py-2">Conocé el plan de estudios</a>
                 </div>
             </div>
@@ -150,7 +151,7 @@
         </div>
 
         <div class="text-center mt-5" data-aos="fade-up">
-            <a href="#" class="btn btn-primary btn-lg px-4 py-2">
+            <a href="#!" class="btn btn-primary btn-lg px-4 py-2 btn-descargar-plan">
                 <i class="fas fa-download me-2"></i>Descargar plan de estudios completo
             </a>
         </div>
@@ -285,7 +286,7 @@
                             <i class="fas fa-calendar-check fa-2x mb-3"></i>
                             <h4>Inscripción 2024</h4>
                             <p class="mb-3">Abierta hasta el 30 de marzo</p>
-                            <a href="#" class="btn btn-light">Inscribite online</a>
+                            <a href="<?= base_url('registro') ?>" class="btn btn-light">Inscribite online</a>
                         </div>
                     </div>
 

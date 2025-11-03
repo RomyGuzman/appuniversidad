@@ -14,13 +14,22 @@ class RegistroController extends Controller
     {
         // Cargar carreras para el dropdown
         $carreraModel = new CarreraModel();
-        $data['carreras'] = $carreraModel->findAll();
-        $data['show_header'] = false;  // Oculta el header en esta vista
+        $data['carreras'] = $carreraModel->orderBy('nombre_carrera', 'ASC')->findAll(); // Usamos findAll() para obtener todas las carreras
 
-        return view('registro', $data);
+        // Cargar todas las modalidades
+        $modalidadModel = new ModalidadModel();
+        $data['modalidades'] = $modalidadModel->orderBy('nombre_modalidad', 'ASC')->findAll();
+
+        // Cargar todas las categorías
+        $categoriaModel = new CategoriaModel();
+        $data['categorias'] = $categoriaModel->orderBy('nombre_categoria', 'ASC')->findAll();
+
+        // Ocultar la sección "Quiénes Somos" en esta vista
+        $data['hide_about'] = true;
+
+        // Pasamos los datos a la vista 'registro.php'
+        return view('registro', $data); // El nombre de la vista es 'registro', no 'Registro'
     }
-
-    // ... (resto del código permanece igual)
 
     public function registrar()
     {
@@ -44,13 +53,15 @@ class RegistroController extends Controller
             'nombre_estudiante' => $this->request->getPost('nombre_estudiante'),
             'fecha_nacimiento' => $this->request->getPost('fecha_nacimiento'),
             'email' => $this->request->getPost('email'),
-            'carrera_id' => $this->request->getPost('carrera_id')
+            'carrera_id' => $this->request->getPost('carrera_id'),
+            'modalidad_id' => $this->request->getPost('modalidad_id'),
+            'categoria_id' => $this->request->getPost('categoria_id')
         ];
 
         $registroEstudianteModel = new RegistroEstudianteModel();
         try {
             $registroEstudianteModel->registrarEstudiante($data);
-            return redirect()->to('/login')->with('success', 'Registro exitoso. Inicia sesión con tu email y DNI.');
+            return redirect()->back()->with('registro_exitoso', true)->with('email', $data['email'])->with('dni', $data['dni']);
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('errors', ['Error al registrar: ' . $e->getMessage()]);
         }
@@ -60,14 +71,22 @@ class RegistroController extends Controller
     public function getModalidades($carreraId)
     {
         $modalidadModel = new ModalidadModel();
-        $modalidades = $modalidadModel->where('carrera_id', $carreraId)->findAll();
+        // Aseguramos que el ID sea un entero válido
+        if (!is_numeric($carreraId) || $carreraId <= 0) {
+            return $this->response->setJSON([]);
+        }
+        $modalidades = $modalidadModel->where('carrera_id', (int)$carreraId)->findAll();
         return $this->response->setJSON($modalidades);
     }
 
     public function getCategorias($carreraId)
     {
         $categoriaModel = new CategoriaModel();
-        $categorias = $categoriaModel->where('carrera_id', $carreraId)->findAll();
+        // Aseguramos que el ID sea un entero válido
+        if (!is_numeric($carreraId) || $carreraId <= 0) {
+            return $this->response->setJSON([]);
+        }
+        $categorias = $categoriaModel->where('carrera_id', (int)$carreraId)->findAll();
         return $this->response->setJSON($categorias);
     }
 }

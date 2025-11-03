@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center w-100">
             <!-- Lado Izquierdo: Instituto Superior 57 -->
-            <a class="navbar-brand d-flex align-items-center text-white" href="<?= base_url('/') ?>">
+            <a class="navbar-brand d-flex align-items-center text-white" href="<?= base_url(); ?>">
                 <i class="fas fa-university me-2"></i>
                 <span>Instituto Superior 57</span>
             </a>

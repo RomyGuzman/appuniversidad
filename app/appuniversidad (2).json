@@ -1,0 +1,125 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"appuniversidad"},
+{"type":"table","name":"asistencia","database":"appuniversidad","data":
+[
+{"id":"1","estudiante_id":"1","materia_id":"1","fecha":"2023-10-01","estado":"Presente","observaciones":null,"inscripcion_id":"1"}
+]
+}
+,{"type":"table","name":"carrera","database":"appuniversidad","data":
+[
+{"id":"1","nombre_carrera":"Desarrollo de Software","codigo_carrera":"DS-1","categoria_id":null,"modalidad_id":null},
+{"id":"2","nombre_carrera":"Profesorado de Inglés","codigo_carrera":"PI-1","categoria_id":null,"modalidad_id":null}
+]
+}
+,{"type":"table","name":"categoria","database":"appuniversidad","data":
+[
+{"id":"1","codigo_categoria":"CAT-TEC","nombre_categoria":"TECNICATURas SUPERIORES","carrera_id":null},
+{"id":"2","codigo_categoria":"CAT-PROF","nombre_categoria":"PROFESORADOS","carrera_id":null},
+{"id":"3","codigo_categoria":"CAT-EDUC","nombre_categoria":"EDUCACIÓN","carrera_id":null},
+{"id":"4","codigo_categoria":"CAT-SALUD","nombre_categoria":"SALUD","carrera_id":null},
+{"id":"5","codigo_categoria":"CAT-TECNO","nombre_categoria":"TECNOLOGÍA","carrera_id":null}
+]
+}
+,{"type":"table","name":"consultas_admin","database":"appuniversidad","data":
+[
+{"id_consulta":"1","email_usuario":"no-email@sistema.com","usuario_id":"3","rol_id":"3","mensaje":"🧩 ALTER TABLE consultas_admin\r\n👉 Este es el comando real que le dice a MySQL:\r\n“Voy a modificar la estructura de la tabla consultas_admin”.\r\n🆕 ADD COLUMN usuario_id INT(11) NULL AFTER email_usuario,\r\n👉 Esto añade una nueva columna a la tabla:\r\n📛 Nombre de la columna: usuario_id\r\n🔢 Tipo de dato: INT(","fecha_creacion":"2025-10-25 01:44:57","estado":"","asunto":"no puedo inscribirme"},
+{"id_consulta":"2","email_usuario":"no-email@sistema.com","usuario_id":"3","rol_id":"3","mensaje":"ttttttttttttttttttttttttttt\r\ngtgggggggggggggggggggggggggggggggg\r\nggggggggggggggggggggggggggggggggggggggggggggggggggg\r\n","fecha_creacion":"2025-10-27 20:41:53","estado":"pendiente","asunto":"tgrtgrt"},
+{"id_consulta":"3","email_usuario":"no-email@sistema.com","usuario_id":"3","rol_id":"3","mensaje":"mbm,jkjhlkhlkhlkhlikhkihkj","fecha_creacion":"2025-10-27 20:46:49","estado":"pendiente","asunto":"problemas"},
+{"id_consulta":"4","email_usuario":"no-email@sistema.com","usuario_id":"3","rol_id":"3","mensaje":"hngnghnythnhgrnhn\r\ntjhthth","fecha_creacion":"2025-10-27 20:55:26","estado":"pendiente","asunto":"uiiiiiii"}
+]
+}
+,{"type":"table","name":"estudiante","database":"appuniversidad","data":
+[
+{"id":"1","dni":"12345678","nombre_estudiante":"Juan Pérez","fecha_nacimiento":"2000-05-10","edad":"24","email":"juan@email.com","carrera_id":"1"},
+{"id":"2","dni":"23456789","nombre_estudiante":"Lucía Fernández","fecha_nacimiento":"2001-08-22","edad":"23","email":"lucia@email.com","carrera_id":"2"}
+]
+}
+,{"type":"table","name":"inscripcion","database":"appuniversidad","data":
+[
+{"id":"1","estudiante_id":"1","materia_id":"1","fecha_inscripcion":"2023-08-01","estado_inscripcion":"Confirmada","observaciones_inscripcion":null,"fecha_aprobacion":null,"cupo_asignado":"1"}
+]
+}
+,{"type":"table","name":"materia","database":"appuniversidad","data":
+[
+{"id":"1","nombre_materia":"Programación I","codigo_materia":"PROG-101","carrera_id":"1"},
+{"id":"2","nombre_materia":"Lógica Computacional ","codigo_materia":"LC-1","carrera_id":"3"},
+{"id":"3","nombre_materia":"Administracion y Gestion de Bases de Datos","codigo_materia":"AYGD-1","carrera_id":"3"},
+{"id":"4","nombre_materia":"Elementos de Analisis Matemáticos","codigo_materia":"EDAM-1","carrera_id":"3"}
+]
+}
+,{"type":"table","name":"migrations","database":"appuniversidad","data":
+[
+{"id":"1","version":"2025-09-27-010101","class":"CreateTablaCategoria","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"2","version":"2025-09-27-010102","class":"CreateTablaModalidad","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"3","version":"2025-09-27-010103","class":"CreateTablaCarrera","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"4","version":"2025-09-27-010104","class":"CreateTablaProfesor","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"5","version":"2025-09-27-010105","class":"CreateTablaAlumno","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"6","version":"2025-09-27-010106","class":"CreateTablaInscripcion","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"7","version":"2025-09-28-000001","class":"CreateTablaRol","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"8","version":"2025-09-28-000002","class":"CreateTablaUsuarios","group":"","namespace":"App","time":"1761416175","batch":"1"},
+{"id":"9","version":"2025-09-27-010101","class":"CreateTablaCategoria","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"10","version":"2025-09-27-010102","class":"CreateTablaModalidad","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"11","version":"2025-09-27-010103","class":"CreateTablaCarrera","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"12","version":"2025-09-27-010104","class":"CreateTablaProfesor","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"13","version":"2025-09-27-010105","class":"CreateTablaAlumno","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"14","version":"2025-09-27-010106","class":"CreateTablaInscripcion","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"15","version":"2025-09-28-000001","class":"CreateTablaRol","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"16","version":"2025-09-28-000002","class":"CreateTablaUsuarios","group":"","namespace":"App","time":"1761417490","batch":"1"},
+{"id":"17","version":"2025-09-27-010101","class":"CreateTablaCategoria","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"18","version":"2025-09-27-010102","class":"CreateTablaModalidad","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"19","version":"2025-09-27-010103","class":"CreateTablaCarrera","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"20","version":"2025-09-27-010104","class":"CreateTablaProfesor","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"21","version":"2025-09-27-010105","class":"CreateTablaAlumno","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"22","version":"2025-09-27-010106","class":"CreateTablaInscripcion","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"23","version":"2025-09-28-000001","class":"CreateTablaRol","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"24","version":"2025-09-28-000002","class":"CreateTablaUsuarios","group":"","namespace":"App","time":"1761418352","batch":"1"},
+{"id":"25","version":"2025-09-27-010101","class":"CreateTablaCategoria","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"26","version":"2025-09-27-010102","class":"CreateTablaModalidad","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"27","version":"2025-09-27-010103","class":"CreateTablaCarrera","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"28","version":"2025-09-27-010104","class":"CreateTablaProfesor","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"29","version":"2025-09-27-010105","class":"CreateTablaAlumno","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"30","version":"2025-09-27-010106","class":"CreateTablaInscripcion","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"31","version":"2025-09-28-000001","class":"CreateTablaRol","group":"","namespace":"App","time":"1761431362","batch":"1"},
+{"id":"32","version":"2025-09-28-000002","class":"CreateTablaUsuarios","group":"","namespace":"App","time":"1761431362","batch":"1"}
+]
+}
+,{"type":"table","name":"modalidad","database":"appuniversidad","data":
+[
+{"id":"1","codigo_modalidad":"MOD-PRES","nombre_modalidad":"PRESENCIAL","carrera_id":null},
+{"id":"2","codigo_modalidad":"MOD-SEMI","nombre_modalidad":"SEMIPRESENCIAL","carrera_id":null},
+{"id":"3","codigo_modalidad":"MOD-VIRT","nombre_modalidad":"VIRTUAL","carrera_id":null},
+{"id":"4","codigo_modalidad":"MOD-LIB","nombre_modalidad":"LIBRE","carrera_id":null}
+]
+}
+,{"type":"table","name":"nota","database":"appuniversidad","data":
+[
+{"id":"1","estudiante_id":"1","materia_id":"1","calificacion":"8.50","fecha_evaluacion":"2023-10-15","observaciones":null,"inscripcion_id":"1"}
+]
+}
+,{"type":"table","name":"profesor","database":"appuniversidad","data":
+[
+{"id":"1","legajo":"1001","nombre_profesor":"María García","carrera_id":"1"},
+{"id":"2","legajo":"1002","nombre_profesor":"Carlos López","carrera_id":"2"}
+]
+}
+,{"type":"table","name":"profesor_materia","database":"appuniversidad","data":
+[
+{"profesor_id":"1","materia_id":"1"}
+]
+}
+,{"type":"table","name":"rol","database":"appuniversidad","data":
+[
+{"id":"1","nombre_rol":"admin"},
+{"id":"3","nombre_rol":"alumno"},
+{"id":"2","nombre_rol":"profesor"}
+]
+}
+,{"type":"table","name":"usuarios","database":"appuniversidad","data":
+[
+{"id":"1","usuario":"admin","password":"$2y$10$7DB7PTKxJI7McZeA0vyCauVlnN2zE8H3kiXCeCOTG02rPspKIfI5a","fecha_registro":"2025-10-31 21:03:45","fecha_ultimo_ingreso":null,"rol_id":"1","activo":"1"},
+{"id":"2","usuario":"profesor1","password":"$2y$10$dBOGgG5QN18uOahsTWRG4.1bxhhf5h\/4mhOHtEzbso\/miaDZmRr2u","fecha_registro":"2025-10-31 21:03:45","fecha_ultimo_ingreso":null,"rol_id":"2","activo":"1"},
+{"id":"3","usuario":"alumno1","password":"e10adc3949ba59abbe56e057f20f883e","fecha_registro":"2025-10-31 21:03:45","fecha_ultimo_ingreso":null,"rol_id":"3","activo":"1"}
+]
+}
+]

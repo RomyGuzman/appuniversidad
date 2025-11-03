@@ -20,12 +20,13 @@
             </div>
         </div>
 
-        <!-- Perfil del Profesor - Acordeón siempre visible pero cerrado -->
-        <div class="col-12 mb-4">
-            <div class="accordion" id="accordionPerfil">
+        <!-- Acordeón para Perfil y Materias -->
+        <div class="col-12">
+            <div class="accordion" id="accordionDashboard">
+                <!-- Perfil del Profesor -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingPerfil">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerfil" aria-expanded="false" aria-controls="collapsePerfil">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerfil" aria-expanded="true" aria-controls="collapsePerfil">
                             <div class="d-flex justify-content-between w-100 align-items-center pe-3">
                                 <span class="fw-bold fs-5">
                                     <i class="fas fa-user me-2"></i>Mi Perfil
@@ -37,89 +38,71 @@
                             </div>
                         </button>
                     </h2>
-                    <div id="collapsePerfil" class="accordion-collapse collapse" aria-labelledby="headingPerfil" data-bs-parent="#accordionPerfil">
+                    <div id="collapsePerfil" class="accordion-collapse collapse show" aria-labelledby="headingPerfil" data-bs-parent="#accordionDashboard">
                         <div class="accordion-body">
-                            <div class="container-fluid" style="max-width: 100%; margin: 0 auto; background-color: white; border-radius: 6px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); padding: 20px;">
-                                <div class="row">
-                                    <!-- Datos del Profesor -->
-                                    <div class="col-md-6">
-                                        <h5 class="mb-3 text-primary">
-                                            <i class="fas fa-user-circle me-2"></i>Datos Personales
-                                        </h5>
-                                        <div class="card border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="mb-2">
-                                                    <strong>Nombre:</strong> <?= esc($profesor['nombre_profesor']) ?>
+                            <div class="row">
+                                <!-- Datos del Profesor -->
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-user-circle me-2"></i>Datos Personales
+                                    </h6>
+                                    <div class="mb-2">
+                                        <strong>Nombre:</strong> <?= esc($profesor['nombre_profesor'] ?? 'No disponible') ?>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>ID:</strong> <?= esc($profesor['id'] ?? 'No disponible') ?>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Legajo:</strong> <?= esc($profesor['legajo'] ?? 'No disponible') ?>
+                                    </div>
+                                </div>
+                                <!-- Estadísticas -->
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">
+                                        <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <div class="card border-0 shadow-sm text-center">
+                                                <div class="card-body">
+                                                    <div class="display-4 text-primary">
+                                                        <?= count($materias ?? []) ?>
+                                                    </div>
+                                                    <div class="text-muted">Materias Asignadas</div>
                                                 </div>
-                                                <div class="mb-2">
-                                                    <strong>ID:</strong> <?= esc($profesor['id']) ?>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="card border-0 shadow-sm text-center">
+                                                <div class="card-body">
+                                                    <div class="display-4 text-success">
+                                                        <!-- Aquí podrías calcular total de estudiantes si está disponible -->
+                                                        <?= array_reduce($materias ?? [], function($carry, $materia) {
+                                                            return $carry + (isset($materia['total_estudiantes']) ? $materia['total_estudiantes'] : 0);
+                                                        }, 0) ?>
+                                                    </div>
+                                                    <div class="text-muted">Estudiantes Totales</div>
                                                 </div>
-                                                <!-- Agregar más campos si están disponibles en $profesor -->
-                                                <?php if (isset($profesor['email'])): ?>
-                                                <div class="mb-2">
-                                                    <strong>Email:</strong> <?= esc($profesor['email']) ?>
-                                                </div>
-                                                <?php endif; ?>
-                                                <?php if (isset($profesor['telefono'])): ?>
-                                                <div class="mb-2">
-                                                    <strong>Teléfono:</strong> <?= esc($profesor['telefono']) ?>
-                                                </div>
-                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Estadísticas -->
-                                    <div class="col-md-6">
-                                        <h5 class="mb-3 text-success">
-                                            <i class="fas fa-chart-bar me-2"></i>Estadísticas
-                                        </h5>
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <div class="card border-0 shadow-sm text-center">
-                                                    <div class="card-body">
-                                                        <div class="display-4 text-primary">
-                                                            <?= count($materias ?? []) ?>
-                                                        </div>
-                                                        <div class="text-muted">Materias Asignadas</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <div class="card border-0 shadow-sm text-center">
-                                                    <div class="card-body">
-                                                        <div class="display-4 text-success">
-                                                            <!-- Aquí podrías calcular total de estudiantes si está disponible -->
-                                                            <?= array_reduce($materias ?? [], function($carry, $materia) {
-                                                                return $carry + (isset($materia['total_estudiantes']) ? $materia['total_estudiantes'] : 0);
-                                                            }, 0) ?>
-                                                        </div>
-                                                        <div class="text-muted">Estudiantes Totales</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- Más estadísticas si es necesario -->
-                                        <div class="card border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <h6 class="text-muted mb-2">Resumen de Materias</h6>
-                                                <ul class="list-unstyled">
-                                                    <?php foreach ($materias ?? [] as $materia): ?>
-                                                    <li class="mb-1">
-                                                        <i class="fas fa-book text-info me-2"></i>
-                                                        <?= esc($materia['nombre_materia']) ?> (<?= esc($materia['codigo_materia']) ?>)
-                                                    </li>
-                                                    <?php endforeach; ?>
-                                                </ul>
-                                            </div>
-                                        </div>
+                                    <!-- Resumen de Materias -->
+                                    <div class="mt-3">
+                                        <h6 class="text-muted mb-2">Materias Asignadas</h6>
+                                        <ul class="list-unstyled">
+                                            <?php foreach ($materias ?? [] as $materia): ?>
+                                            <li class="mb-1">
+                                                <i class="fas fa-book text-info me-2"></i>
+                                                <?= esc($materia['nombre_materia']) ?> (<?= esc($materia['codigo_materia']) ?>)
+                                            </li>
+                                            <?php endforeach; ?>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
         <!-- Materias - Full Width -->
         <div class="col-12">

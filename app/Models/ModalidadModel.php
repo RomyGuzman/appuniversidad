@@ -6,13 +6,13 @@ use CodeIgniter\Model;
 
 class ModalidadModel extends Model
 {
-    protected $table = 'modalidad'; // Corregido a minúsculas por convención
+    protected $table = 'Modalidad';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['codigo_modalidad', 'nombre_modalidad'];
+    protected $allowedFields = ['codigo_modalidad', 'nombre_modalidad', 'carrera_id'];
     protected $useTimestamps = false;
 
     protected $validationRules = [
-        'codigo_modalidad' => 'required|min_length[2]|max_length[20]|is_unique[modalidad.codigo_modalidad,id,{id}]',
+        'codigo_modalidad' => 'required|min_length[2]|max_length[20]|is_unique[Modalidad.codigo_modalidad,id,{id}]',
         'nombre_modalidad' => 'required|min_length[2]|max_length[120]',
     ];
 

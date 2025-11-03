@@ -11,7 +11,7 @@ class CategoriaModel extends Model
     // --- Propiedades de Configuración del Modelo ---
 
     // Especifica la tabla de la base de datos que este modelo representa.
-    protected $table = 'categoria'; // Corregido a minúsculas por convención
+    protected $table = 'Categoria';
     // Especifica el nombre de la columna que es la clave primaria de la tabla.
     protected $primaryKey = 'id';
     // Define los campos que se pueden insertar o actualizar masivamente.
@@ -21,11 +21,11 @@ class CategoriaModel extends Model
 
     // Define las reglas de validación que se aplicarán antes de guardar o actualizar.
     protected $validationRules = [
-        // 'id_cat' no es requerido para la creación.
+        // 'id' no es requerido para la creación.
         'id' => 'permit_empty|integer',
-        // 'codcat' es obligatorio, único en la tabla (ignorando el registro actual en una actualización), y con un máximo de 20 caracteres.
-        'codigo_categoria' => 'required|is_unique[categoria.codigo_categoria,id,{id}]|max_length[20]',
-        // 'ncat' es obligatorio, con una longitud entre 2 y 120 caracteres.
+        // 'codigo_categoria' es obligatorio, único en la tabla (ignorando el registro actual en una actualización), y con un máximo de 20 caracteres.
+        'codigo_categoria' => 'required|is_unique[Categoria.codigo_categoria,id,{id}]|max_length[20]',
+        // 'nombre_categoria' es obligatorio, con una longitud entre 2 y 120 caracteres.
         'nombre_categoria' => 'required|min_length[2]|max_length[120]',
     ];
     // Define mensajes de error personalizados para las reglas de validación.

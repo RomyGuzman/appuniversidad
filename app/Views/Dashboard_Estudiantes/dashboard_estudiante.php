@@ -12,7 +12,7 @@
             <h2 class="mb-0">Mis Materias</h2>
         </div>
         <div class="d-flex align-items-center gap-3">
-            <h5 class="mb-0 text-muted">Bienvenido, <?= esc($estudiante['nombre_estudiante']) ?></h5>
+            <h5 class="mb-0 text-muted">Bienvenido, <?= esc($estudiante['nombre_estudiante'] ?? 'Estudiante') ?></h5>
             <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalConsultaEstudiante">
                 <i class="fas fa-envelope me-2"></i>Contactar al Administrador
             </button>
@@ -27,8 +27,8 @@
                     <h5 class="mb-0"><i class="fas fa-user-graduate me-2"></i>Mi Perfil</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Nombre:</strong><br><?= esc($estudiante['nombre_estudiante']) ?></p>
-                    <p><strong>DNI:</strong><br><?= esc($estudiante['dni']) ?></p>
+                    <p><strong>Nombre:</strong><br><?= esc($estudiante['nombre_estudiante'] ?? 'No disponible') ?></p>
+                    <p><strong>DNI:</strong><br><?= esc($estudiante['dni'] ?? 'No disponible') ?></p>
                     <p><strong>Carrera:</strong><br><?= esc($estudiante['nombre_carrera'] ?? 'No asignada') ?></p>
                 </div>
             </div>
@@ -243,7 +243,7 @@
             <form action="<?= base_url('consultas/enviar') ?>" method="post">
                 <?= csrf_field() ?>
                 <!-- Usamos el ID del estudiante que viene del controlador -->
-                <input type="hidden" name="usuario_id" value="<?= esc($estudiante['id']) ?>">
+                <input type="hidden" name="usuario_id" value="<?= esc($estudiante['id'] ?? '') ?>">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="asunto" class="form-label">Asunto</label>
