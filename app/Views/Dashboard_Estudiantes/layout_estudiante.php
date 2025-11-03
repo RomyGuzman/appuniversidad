@@ -20,7 +20,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container">
-    <a class="navbar-brand" href="<?= base_url('/') ?>">
+    <a class="navbar-brand" href="<?= base_url(); ?>">
         <i class="fas fa-university me-2"></i>Instituto Superior 57
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavEstudiante" aria-controls="navbarNavEstudiante" aria-expanded="false" aria-label="Toggle navigation">

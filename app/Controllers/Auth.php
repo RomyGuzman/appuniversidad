@@ -48,9 +48,9 @@ class Auth extends BaseController
         $usuario = $usuarioModel->where('usuario', $identifier)->first();
 
         // 3. Verificar contraseña y crear sesión
-        // NOTA: Se usa md5() para la verificación, según lo solicitado.
-        // Para mayor seguridad en proyectos futuros, se recomienda password_hash() y password_verify().
-        if ($usuario && md5((string)$password) === $usuario['password']) {
+        // CORRECCIÓN PRECISA: Se utiliza md5() para comparar la contraseña con el hash MD5
+        // en la base de datos, como solicitado.
+        if ($usuario && md5($password) === $usuario['password']) {
             // ¡Login exitoso!
             $this->setUserSession($usuario);
 

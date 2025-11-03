@@ -206,7 +206,7 @@
         </div>
 
         <div class="text-center mt-5" data-aos="fade-up">
-            <a href="#" class="btn btn-primary btn-lg px-4 py-2">
+            <a href="#!" class="btn btn-primary btn-lg px-4 py-2 btn-descargar-plan">
                 <i class="fas fa-download me-2"></i>Descargar plan de estudios completo
             </a>
         </div>
@@ -359,7 +359,7 @@
                             <i class="fas fa-calendar-check fa-2x mb-3"></i>
                             <h4>Inscripción 2024</h4>
                             <p class="mb-3">Abierta hasta el 15 de marzo</p>
-                            <a href="#" class="btn btn-light">Inscribite online</a>
+                    <a href="<?= base_url('registro') ?>" class="btn btn-light">Inscribite online</a>
                         </div>
                     </div>
 

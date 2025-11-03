@@ -5,7 +5,11 @@
     <?= $this->include('templates/Navbar') ?>
 
     <?php if (!isset($show_header) || $show_header): ?>
-        <?= $this->include('templates/header_content') ?>
+        <?php if (isset($data['hide_about']) && $data['hide_about']): ?>
+            <?= $this->include('templates/header_content_minimal') ?>
+        <?php else: ?>
+            <?= $this->include('templates/header_content') ?>
+        <?php endif; ?>
     <?php endif; ?>
 
     <main>

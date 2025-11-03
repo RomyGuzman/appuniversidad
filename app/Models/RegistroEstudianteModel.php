@@ -8,7 +8,7 @@ class RegistroEstudianteModel extends Model
 {
     protected $table = 'Estudiante';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['dni', 'nombre_estudiante', 'fecha_nacimiento', 'edad', 'email', 'carrera_id'];
+    protected $allowedFields = ['dni', 'nombre_estudiante', 'fecha_nacimiento', 'edad', 'email', 'carrera_id', 'modalidad_id', 'categoria_id'];
     protected $useTimestamps = false;
 
     // Método para registrar estudiante y usuario

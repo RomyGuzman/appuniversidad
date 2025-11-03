@@ -22,9 +22,27 @@ class UsuarioSeeder extends Seeder
 
         // Define un array con los usuarios de ejemplo.
         $usuarios = [
-            ['usuario' => 'admin', 'password' => password_hash('admin123', PASSWORD_DEFAULT), 'rol_id' => 1],
-            ['usuario' => 'profesor1', 'password' => password_hash('prof123', PASSWORD_DEFAULT), 'rol_id' => 2],
-            ['usuario' => 'alumno1', 'password' => password_hash('alum123', PASSWORD_DEFAULT), 'rol_id' => 3],
+            [
+                'usuario' => 'admin',
+                'password' => md5('123456'),
+                'fecha_registro' => date('Y-m-d H:i:s'),
+                'rol_id' => 1,
+                'activo' => 1,
+            ],
+            [
+                'usuario' => 'profesor1',
+                'password' => md5('123456'),
+                'fecha_registro' => date('Y-m-d H:i:s'),
+                'rol_id' => 2,
+                'activo' => 1,
+            ],
+            [
+                'usuario' => 'alumno1',
+                'password' => md5('123456'),
+                'fecha_registro' => date('Y-m-d H:i:s'),
+                'rol_id' => 3,
+                'activo' => 1,
+            ],
         ];
 
         // Inserta el lote de usuarios en la base de datos.

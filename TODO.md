@@ -1,9 +1,2 @@
-# TODO: Análisis de vistas_dinamicas_readme.md
-
-- [ ] Resumir el contenido del archivo vistas_dinamicas_readme.md
-- [ ] Verificar componentes clave: Vistas, Rutas, Controlador, JavaScript
-- [ ] Leer AjaxController.php para confirmar métodos
-- [ ] Leer app.js para verificar lógica JavaScript
-- [ ] Leer Routes.php para confirmar rutas AJAX
-- [ ] Verificar existencia de vistas parciales mencionadas
-- [ ] Sugerir mejoras basadas en el análisis
+- [x] Cambiar verificación de contraseña en Auth.php de password_verify() a md5()
+- [x] Actualizar contraseña de "admin" en appuniversidad (2).json a MD5 de "123456"

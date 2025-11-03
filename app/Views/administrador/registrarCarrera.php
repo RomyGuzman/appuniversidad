@@ -52,7 +52,7 @@
                     </ul>
                 </div>
             <?php endif ?>
-            <form id="careerForm" action="<?= base_url('carreras/registrar') ?>" method="POST">
+            <form id="careerForm" action="<?= base_url('administrador/carreras/registrar') ?>" method="POST">
               <?= csrf_field() ?>
               <input type="hidden" id="careerId" />
               <div class="mb-3">
