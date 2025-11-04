@@ -23,6 +23,10 @@ CREATE TABLE Carrera (
 
 
 
+
+
+
+
 -- Rol (independiente)
 CREATE TABLE Rol (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -83,7 +87,6 @@ CREATE TABLE Categoria (
   CONSTRAINT fk_categoria_carrera FOREIGN KEY (carrera_id) REFERENCES Carrera(id)
     ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB;
-
 
 
 -- Modalidad (depende de Carrera)
@@ -292,3 +295,33 @@ ADD COLUMN `rol_id` INT(11) NULL AFTER `usuario_id`;
 ALTER TABLE Carrera ADD COLUMN categoria_id BIGINT UNSIGNED NULL;
 ALTER TABLE Carrera ADD COLUMN modalidad_id BIGINT UNSIGNED NULL;
 
+
+
+
+
+
+-- Carrera
+CREATE TABLE Carrera (
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+nombre_carrera VARCHAR(120) NOT NULL,
+codigo_carrera VARCHAR(20) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE Categoria (
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+codigo_categoria VARCHAR(20) NOT NULL UNIQUE,
+nombre_categoria VARCHAR(120) NOT NULL,
+carrera_id BIGINT UNSIGNED,
+CONSTRAINT fk_categoria_carrera FOREIGN KEY (carrera_id) REFERENCES Carrera(id)
+ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+
+CREATE TABLE Modalidad (
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+codigo_modalidad VARCHAR(20) NOT NULL UNIQUE,
+nombre_modalidad VARCHAR(120) NOT NULL,
+carrera_id BIGINT UNSIGNED,
+CONSTRAINT fk_modalidad_carrera FOREIGN KEY (carrera_id) REFERENCES Carrera(id)
+ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB;

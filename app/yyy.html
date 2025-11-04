@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interactivo del Flujo MVC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Se elimina la librería Chart.js ya que no se usarán gráficos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette: High-Contrast Slate & Vibrant Teal (Sleek, Modern, Professional) */
+        /* Primary BG: #0A0A0A (Near Black) */
+        /* Card/Accent BG: #1F242A (Very Dark Slate Gray) */
+        /* Accent 1 (Flow/Highlight - Teal/Aqua): #00CED1 */
+        /* Accent 2 (Secondary Highlight - Vibrant Orange): #FF6347 */
+        /* Text: #F3F4F6 (Light Gray) */
+        /* Secondary Text: #9CA3AF (Medium Gray) */
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A; 
+        }
+        .card {
+            background-color: #1F242A; 
+            border: 1px solid #374151; 
+            /* Subtle modern shadow */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 206, 209, 0.1); 
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 206, 209, 0.2);
+        }
+        /* Se elimina el estilo .chart-container */
+        .flow-actor {
+            transition: all 0.3s ease-in-out;
+            opacity: 0.7;
+            transform: scale(0.98);
+            font-size: 0.75rem; 
+            line-height: 1.2;
+        }
+        .flow-actor.active {
+            opacity: 1;
+            transform: scale(1.05); 
+            border: 2px solid #00CED1; /* Teal Border */
+            /* Clean focus glow */
+            box-shadow: 0 0 12px rgba(0, 206, 209, 0.7); 
+        }
+        
+        /* New CSS for the Animated Flow Path */
+        #flow-path-indicator {
+            position: absolute;
+            height: 4px; 
+            top: 50%;
+            margin-top: -2px; 
+            background-color: #00CED1; /* Teal */
+            border-radius: 9999px; 
+            transition: left 0.7s cubic-bezier(0.86, 0, 0.07, 1), width 0.7s cubic-bezier(0.86, 0, 0.07, 1), opacity 0.3s;
+            z-index: 10;
+            opacity: 0; 
+        }
+
+        /* Arrow Head Mixin (Common styles) */
+        #flow-path-indicator::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            transition: all 0.7s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        /* Forward Flow (LTR) - Arrow pointing right */
+        #flow-path-indicator.forward-flow::after {
+            border-width: 6px 0 6px 8px; 
+            border-color: transparent transparent transparent #00CED1; /* Teal */
+            right: -8px; 
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Reverse Flow (RTL) - Arrow pointing left */
+        #flow-path-indicator.reverse-flow::after {
+            border-width: 6px 8px 6px 0; 
+            border-color: transparent #00CED1 transparent transparent; /* Teal */
+            left: -8px; 
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        #actor-list {
+            padding-top: 15px; 
+            padding-bottom: 15px;
+        }
+        
+        /* Modern, high-contrast button */
+        .glow-button {
+            background-color: #FF6347; /* Vibrant Orange */
+            color: #0A0A0A;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 99, 71, 0.5);
+        }
+        .glow-button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 99, 71, 0.7);
+        }
+
+        @media (min-width: 768px) {
+            .flow-actor {
+                font-size: 0.875rem; 
+            }
+        }
+    </style>
+</head>
+<body class="text-[#F3F4F6] min-h-screen p-4 md:p-8">
+
+    <div class="container mx-auto">
+        <header class="text-center mb-10 card rounded-xl p-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-2" style="text-shadow: 0 0 10px rgba(0, 206, 209, 0.7);">Ciclo de Vida de una Solicitud (MVC)</h1>
+            <p class="text-lg text-[#9CA3AF]">Análisis Didáctico del Flujo de Datos para la Gestión de Alumnos.</p>
+        </header>
+        
+        <!-- KPI Section (Se mantiene, pero se podría eliminar si no es relevante) -->
+        <section id="kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="card rounded-xl p-6 text-center">
+                <p class="text-sm font-semibold text-[#9CA3AF] mb-1">Latencia Total Simulada</p>
+                <p class="text-5xl font-bold text-[#FF6347]">285 ms</p>
+                <p class="text-xs text-white/70">Tiempo promedio por transacción (CREATE)</p>
+            </div>
+            <div class="card rounded-xl p-6 text-center">
+                <p class="text-sm font-semibold text-[#9CA3AF] mb-1">Rutas Críticas (Controlador)</p>
+                <p class="text-5xl font-bold text-white">45%</p>
+                <p class="text-xs text-white/70">Porcentaje de tiempo dedicado a lógica y validación.</p>
+            </div>
+            <div class="card rounded-xl p-6 text-center">
+                <p class="text-sm font-semibold text-[#9CA3AF] mb-1">Volumen de Datos (Modelo)</p>
+                <p class="text-5xl font-bold text-[#00CED1]">5.2 MB</p>
+                <p class="text-xs text-white/70">Promedio de datos movidos por consulta compleja.</p>
+            </div>
+        </section>
+
+        <!-- Interactive Flow Section (The Core Didactic Element) -->
+        <section id="interactive-flow" class="mb-12">
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">Flujo Interactivo Paso a Paso (11 Etapas)</h2>
+            
+            <div class="card rounded-xl p-8">
+                <!-- Step Navigation -->
+                <div class="flex justify-between items-center mb-8">
+                    <button id="prevBtn" class="glow-button font-bold py-2 px-6 rounded-full transition duration-300">
+                        &larr; Anterior
+                    </button>
+                    <div class="text-center">
+                        <span id="currentStep" class="text-4xl font-extrabold text-[#00CED1]">1</span>
+                        <span class="text-2xl text-[#9CA3AF]"> / 11</span>
+                    </div>
+                    <button id="nextBtn" class="glow-button font-bold py-2 px-6 rounded-full transition duration-300">
+                        Siguiente &rarr;
+                    </button>
+                </div>
+                
+                <!-- Actors and Flow Path -->
+                <div id="flow-path-container" class="relative mb-8">
+                    <!-- Animated Path Indicator (The animated arrow/line) -->
+                    <div id="flow-path-indicator" class="absolute h-1 top-1/2 -mt-0.5 rounded-full z-10"></div>
+                    
+                    <!-- Actor Track - Base line for reference -->
+                    <div class="h-0.5 bg-[#4B5563] w-full absolute top-1/2 -mt-0.25"></div>
+
+                    <!-- Actors List - Using relative positioning for z-index above the path -->
+                    <div id="actor-list" class="flex justify-between relative z-20">
+                        <div id="actor-user" data-actor="user" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">👤 Usuario</div>
+                        <div id="actor-browser" data-actor="browser" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">🖼️ Navegador</div>
+                        <div id="actor-router" data-actor="router" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">⚙️ Router</div>
+                        <div id="actor-controller" data-actor="controller" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">⚙️ Controlador</div>
+                        <div id="actor-model" data-actor="model" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">📦 Modelo</div>
+                        <div id="actor-db" data-actor="db" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">💾 DB</div>
+                        <div id="actor-view" data-actor="view" class="flow-actor p-2 rounded-xl text-center bg-[#1F242A] flex-1 mx-1 max-w-[12%] border border-transparent">🖼️ Vista</div>
+                    </div>
+                </div>
+
+                <!-- Step Details -->
+                <div class="p-6 rounded-xl bg-[#2D3748] border-l-4 border-[#00CED1] shadow-inner">
+                    <h3 id="stepTitle" class="text-2xl font-semibold text-[#FF6347] mb-2"></h3>
+                    <p id="stepActors" class="text-sm font-medium text-white mb-3"></p>
+                    <p id="stepDescription" class="text-[#F3F4F6]"></p>
+                    <p id="stepKeyTakeaway" class="text-xs italic mt-4 text-[#00CED1] border-t border-dashed border-[#FF6347] pt-2"></p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Se ha eliminado la sección #analysis que contenía los gráficos de rendimiento -->
+        
+        <footer class="text-center mt-12 pt-8 border-t border-[#374151]">
+            <p class="text-sm text-[#9CA3AF]">&copy; 2025 Dashboard Analítico MVC. Herramienta Didáctica Avanzada.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const flowSteps = [
+            { 
+                step: 1, 
+                title: "Inicio de la Acción: Captura de Intención", 
+                actors: "👤 Usuario → 🖼️ Navegador", 
+                description: "La **Vista (View)** actúa como la interfaz gráfica (UI). El usuario (Secretaría) introduce información (ej. datos de un nuevo alumno) en un formulario HTML. La acción decisiva es hacer clic en el botón 'Guardar' (submit), lo que genera un evento que el Navegador empaqueta como una solicitud HTTP. La Vista, por sí misma, no procesa la lógica, solo captura la interacción.", 
+                highlight: ["user", "browser", "view"], 
+                takeaway: "Punto de partida: La Vista es el canal de entrada de datos y el gatillo de todo el ciclo.", 
+                startActor: "user", 
+                endActor: "browser" 
+            },
+            { step: 2, title: "Envío de Solicitud HTTP", actors: "🖼️ Navegador → ⚙️ Router", description: "El Navegador empaqueta la intención del usuario y los datos del formulario como una Solicitud HTTP (típicamente POST) y la envía al servidor. Esta solicitud va dirigida a una URL específica (ej. `/alumnos/crear`).", highlight: ["browser", "router"], takeaway: "Función: Comunicación entre cliente y servidor.", startActor: "browser", endActor: "router" },
+            { step: 3, title: "Enrutamiento (Routing)", actors: "⚙️ Router → ⚙️ Controlador", description: "El Router del servidor intercepta la solicitud, analiza la URL y el método HTTP. Su trabajo es determinar qué **Controlador** (AlumnosController) y qué método deben manejar esta acción específica, dirigiendo el tráfico interno.", highlight: ["router", "controller"], takeaway: "Toma de decisión: Conexión entre URL y el fragmento de código correcto.", startActor: "router", endActor: "controller" },
+            { step: 4, title: "Validación y Lógica Inicial", actors: "⚙️ Controlador → ⚙️ Controlador", description: "El Controlador toma el control. Primero, realiza la **Validación** de los datos (verificando que no falten campos, que el DNI tenga formato correcto, etc.) y aplica lógica de negocio inicial antes de tocar la base de datos.", highlight: ["controller"], takeaway: "Responsabilidad crítica: Asegurar la integridad y validez de los datos recibidos.", startActor: "controller", endActor: "controller" }, 
+            { step: 5, title: "Solicitud al Modelo", actors: "⚙️ Controlador → 📦 Modelo", description: "Si la validación es exitosa, el Controlador invoca un método en el **Modelo** (AlumnoModel), delegando la responsabilidad de la operación de datos. El Controlador no sabe de bases de datos, solo de reglas de negocio.", highlight: ["controller", "model"], takeaway: "Delegación: El Controlador le dice al Modelo *qué* hacer, no *cómo* hacerlo.", startActor: "controller", endActor: "model" },
+            { step: 6, title: "Generación y Ejecución de SQL", actors: "📦 Modelo → 💾 Base de Datos", description: "El Modelo construye la Solicitud SQL (INSERT, UPDATE o DELETE) y la envía a la **Base de Datos** (MySQL/PostgreSQL) para que los datos se persistan.", highlight: ["model", "db"], takeaway: "Abstracción: El Modelo es el único punto de contacto con el sistema de persistencia.", startActor: "model", endActor: "db" },
+            { step: 7, title: "Respuesta de Persistencia", actors: "💾 Base de Datos → 📦 Modelo", description: "La Base de Datos procesa la consulta (ej. inserta el registro) y devuelve el resultado (confirmación, ID generado, o un error) al Modelo.", highlight: ["db", "model"], takeaway: "Confirmación: Verificación del estado de la operación de persistencia.", startActor: "db", endActor: "model" },
+            { step: 8, title: "Retorno de Datos/Estado", actors: "📦 Modelo → ⚙️ Controlador", description: "El Modelo retorna el resultado de la operación (ej. el objeto Alumno con su ID final o un mensaje de éxito) al Controlador para que este continúe el flujo.", highlight: ["model", "controller"], takeaway: "Actualización: El Controlador recibe el estado final de la operación.", startActor: "model", endActor: "controller" },
+            { step: 9, title: "Preparación de la Vista", actors: "⚙️ Controlador → 🖼️ Vista", description: "El Controlador decide cuál es la **Vista** adecuada para mostrar la respuesta (ej. la página de éxito o la lista actualizada) y le pasa los datos que debe mostrar (ej. el mensaje de 'Alumno registrado con éxito').", highlight: ["controller", "view"], takeaway: "Selección: El Controlador enlaza el resultado de la lógica con la presentación visual.", startActor: "controller", endActor: "view" },
+            { step: 10, title: "Renderizado HTML Final", actors: "🖼️ Vista → 🖼️ Navegador", description: "La Vista toma los datos recibidos, los inserta en la plantilla de diseño y genera el Código HTML final completo. Este código es el cuerpo de la Respuesta HTTP que se envía de vuelta al cliente.", highlight: ["view", "browser"], takeaway: "Presentación: Creación del contenido visual final con datos dinámicos.", startActor: "view", endActor: "browser" },
+            { step: 11, title: "Presentación al Usuario", actors: "🖼️ Navegador → 👤 Usuario", description: "El Navegador recibe la Respuesta HTTP (el código HTML), lo interpreta, lo dibuja y Muestra la página web final al usuario, terminando el ciclo de vida de la solicitud.", highlight: ["browser", "user"], takeaway: "Fin del ciclo: Experiencia de Usuario finalizada.", startActor: "browser", endActor: "user" }
+        ];
+
+        let currentStepIndex = 0;
+
+        const updateFlow = () => {
+            const stepData = flowSteps[currentStepIndex];
+            document.getElementById('currentStep').textContent = stepData.step;
+            document.getElementById('stepTitle').textContent = `Paso ${stepData.step}: ${stepData.title}`;
+            document.getElementById('stepActors').textContent = stepData.actors;
+            document.getElementById('stepDescription').textContent = stepData.description;
+            document.getElementById('stepKeyTakeaway').textContent = `Clave Didáctica: ${stepData.takeaway}`;
+
+            // Update Actors Highlight
+            document.querySelectorAll('.flow-actor').forEach(actor => actor.classList.remove('active'));
+            stepData.highlight.forEach(actorId => {
+                const element = document.getElementById(`actor-${actorId}`);
+                if (element) {
+                    element.classList.add('active');
+                }
+            });
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentStepIndex === 0;
+            document.getElementById('prevBtn').classList.toggle('opacity-50', currentStepIndex === 0);
+            document.getElementById('nextBtn').disabled = currentStepIndex === flowSteps.length - 1;
+            document.getElementById('nextBtn').classList.toggle('opacity-50', currentStepIndex === flowSteps.length - 1);
+            
+            // NEW FLOW PATH LOGIC
+            const flowPathIndicator = document.getElementById('flow-path-indicator');
+            const container = document.getElementById('actor-list');
+            const startActorElement = document.getElementById(`actor-${stepData.startActor}`);
+            const endActorElement = document.getElementById(`actor-${stepData.endActor}`);
+
+            // Reset indicator visibility and direction classes
+            flowPathIndicator.style.opacity = 0;
+            flowPathIndicator.classList.remove('forward-flow', 'reverse-flow');
+
+            if (startActorElement && endActorElement && stepData.startActor !== stepData.endActor) {
+                // Wait for DOM update after actor highlight
+                setTimeout(() => {
+                    const containerRect = container.getBoundingClientRect();
+                    const startRect = startActorElement.getBoundingClientRect();
+                    const endRect = endActorElement.getBoundingClientRect();
+
+                    // Calculate center points relative to the container
+                    const startCenter = (startRect.left + startRect.right) / 2 - containerRect.left;
+                    const endCenter = (endRect.left + endRect.right) / 2 - containerRect.left;
+
+                    const startX = Math.min(startCenter, endCenter);
+                    const width = Math.abs(endCenter - startCenter);
+                    
+                    // Set indicator style
+                    flowPathIndicator.style.left = `${startX}px`;
+                    flowPathIndicator.style.width = `${width}px`;
+                    
+                    // Determine direction for arrow styling
+                    if (endCenter > startCenter) {
+                        flowPathIndicator.classList.add('forward-flow');
+                    } else {
+                        flowPathIndicator.classList.add('reverse-flow');
+                    }
+                    
+                    // Show indicator
+                    flowPathIndicator.style.opacity = 1;
+
+                }, 50); 
+            }
+        };
+
+        const initFlowControls = () => {
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentStepIndex > 0) {
+                    currentStepIndex--;
+                    updateFlow();
+                }
+            });
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentStepIndex < flowSteps.length - 1) {
+                    currentStepIndex++;
+                    updateFlow();
+                }
+            });
+            updateFlow();
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFlowControls();
+            
+            // Se eliminó toda la inicialización de Chart.js
+        });
+    </script>
+</body>
+</html>

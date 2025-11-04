@@ -148,3 +148,6 @@ $routes->group('api', static function ($routes) {
     $routes->get('get_categorias', 'ApiController::getCategorias');
     $routes->get('get_modalidades', 'ApiController::getModalidades');
 });
+
+// --- RUTA PARA ENVIAR CONSULTAS ---
+$routes->post('consultas/enviar', 'Consultas::enviar');
