@@ -26,6 +26,8 @@ $routes->post('registro', 'RegistroController::registrar');
 $routes->get('registro/getModalidades/(:num)', 'RegistroController::getModalidades/$1');
 $routes->get('registro/getCategorias/(:num)', 'RegistroController::getCategorias/$1');
 
+   
+
 // --- RUTAS PARA CARGA DE CONTENIDO DINÁMICO (AJAX) ---
 // CORRECCIÓN: Se implementan las rutas explícitas con guiones bajos, siguiendo la documentación.
 // Esto asegura que cada URL de AJAX apunte directamente a su método correspondiente en AjaxController.
