@@ -4,7 +4,7 @@
 
     <?= $this->include('templates/Navbar') ?>
 
-    <?php if (!isset($show_header) || $show_header): ?>
+ <?php if (!isset($show_header) || $show_header): ?>
         <?php if (isset($data['hide_about']) && $data['hide_about']): ?>
             <?= $this->include('templates/header_content_minimal') ?>
         <?php else: ?>
