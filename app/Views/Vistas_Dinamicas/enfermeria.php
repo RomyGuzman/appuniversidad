@@ -21,7 +21,8 @@
                     </div>
                 </div>
                 <div class="mt-4 text-center">
-                    <a href="registro" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
+                    <!-- CORRECCIÓN: Se usa la clase .btn-inscribir para la carga dinámica del formulario -->
+                    <a href="<?= base_url('registro') ?>" class="btn btn-primary btn-lg me-3 px-4 py-2">Inscribite ahora</a>
                     <a href="#plan-estudios" class="btn btn-secondary btn-lg px-4 py-2">Conocé el plan de estudios</a>
                 </div>
             </div>

@@ -66,27 +66,31 @@
                                     </thead>
                                     <tbody>
                                         <?php foreach ($consultas as $consulta): ?>
-                                            <tr id="consulta-row-<?= esc($consulta['id_consulta']) ?>" class="shadow-sm <?= $consulta['estado'] === 'resuelta' ? 'table-secondary text-muted' : '' ?>">
+                                            <tr id="consulta-row-<?= esc($consulta->id_consulta) ?>" class="shadow-sm <?= $consulta->estado === 'resuelta' ? 'table-secondary text-muted' : '' ?>">
                                                 <td>
-                                                    <i class="fas fa-check-circle text-success" title="Resuelta"></i>
+                                                    <?php if ($consulta->estado === 'resuelta'): ?>
+                                                        <i class="fas fa-check-circle text-success" title="Resuelta"></i>
+                                                    <?php else: ?>
+                                                        <span class="text-warning" title="Pendiente">Pendiente</span>
+                                                    <?php endif; ?>
                                                 </td>
-                                                <td class="fw-bold"><?= esc($consulta['asunto']) ?></td>
-                                                <td><?= esc($consulta['nombre_remitente'] ?? 'Usuario no identificado') ?></td>
-                                                <td><?= esc($consulta['nombre_rol'] ?? 'Rol no definido') ?></td>
-                                                <td><?= esc(date('d/m/Y H:i', strtotime($consulta['fecha_creacion']))) ?></td>
+                                                <td class="fw-bold"><?= esc($consulta->asunto) ?></td>
+                                                <td><?= esc($consulta->nombre_remitente ?? 'Usuario no identificado') ?></td>
+                                                <td><?= esc($consulta->nombre_rol ?? 'Rol no definido') ?></td>
+                                                <td><?= esc(date('d/m/Y H:i', strtotime($consulta->fecha_creacion))) ?></td>
                                                 <td class="text-center">
-                                                    <button class="btn btn-primary btn-sm view-details-btn" 
-                                                            data-bs-toggle="modal" 
+                                                    <button class="btn btn-primary btn-sm view-details-btn"
+                                                            data-bs-toggle="modal"
                                                             data-bs-target="#detalleConsultaModal"
-                                                            data-asunto="<?= esc($consulta['asunto']) ?>"
-                                                            data-mensaje="<?= esc($consulta['mensaje']) ?>"
-                                                            data-remitente="<?= esc($consulta['nombre_remitente'] ?? 'N/A') ?>"
-                                                            data-email="<?= esc($consulta['email_usuario']) ?>"
-                                                            data-fecha="<?= esc(date('d/m/Y H:i', strtotime($consulta['fecha_creacion']))) ?>">
+                                                            data-asunto="<?= esc($consulta->asunto) ?>"
+                                                            data-mensaje="<?= esc($consulta->mensaje) ?>"
+                                                            data-remitente="<?= esc($consulta->nombre_remitente ?? 'N/A') ?>"
+                                                            data-email="<?= esc($consulta->email_usuario) ?>"
+                                                            data-fecha="<?= esc(date('d/m/Y H:i', strtotime($consulta->fecha_creacion))) ?>">
                                                         <i class="fas fa-eye me-1"></i> Ver
                                                     </button>
-                                                    <?php if ($consulta['estado'] === 'pendiente'): ?>
-                                                        <button class="btn btn-success btn-sm mark-as-read-btn" data-id="<?= esc($consulta['id_consulta']) ?>">
+                                                    <?php if ($consulta->estado === 'pendiente'): ?>
+                                                        <button class="btn btn-success btn-sm mark-as-read-btn" data-id="<?= esc($consulta->id_consulta) ?>">
                                                             <i class="fas fa-check-circle me-1"></i> Resolver
                                                         </button>
                                                     <?php endif; ?>

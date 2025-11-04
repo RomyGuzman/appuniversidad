@@ -13,7 +13,7 @@ class ConsultasAdmin extends BaseController
         $consultaModel = new ConsultaAdminModel();
         // Usamos el nuevo método para obtener datos paginados y con información del remitente
         $data['consultas'] = $consultaModel->getConsultasPaginadas(15); // Mostrar 15 por página
-        $data['pager'] = $consultaModel->pager; // Pasamos el paginador a la vista
+        $data['pager'] = \Config\Services::pager(); // Pasamos el paginador a la vista
 
         return view('administrador/alertas', $data);
     }

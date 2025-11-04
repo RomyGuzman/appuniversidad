@@ -145,11 +145,16 @@
                 <h5 class="modal-title" id="modalConsultaProfLabel"><i class="fas fa-envelope-open-text me-2"></i>Enviar Consulta al Administrador</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="<?= base_url('consultas/enviar') ?>" method="post">
+            <form id="formConsultaProfesor" action="<?= base_url('consultas/enviar') ?>" method="post">
                 <?= csrf_field() ?>
                 <!-- Usamos el ID del profesor que viene del controlador -->
                 <input type="hidden" name="usuario_id" value="<?= esc($profesor['id']) ?>">
+                <input type="hidden" name="tipo_usuario" value="profesor">
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="tuemail@ejemplo.com" required>
+                    </div>
                     <div class="mb-3">
                         <label for="asunto" class="form-label">Asunto</label>
                         <input type="text" class="form-control" id="asunto" name="asunto" placeholder="Ej: Problema con una materia" required>
@@ -176,4 +181,69 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="<?= base_url('js/dashboard_asistencia.js') ?>"></script>
+<script>
+// Manejar el envío del formulario de consulta
+document.getElementById('formConsultaProfesor').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const form = this;
+    const formData = new FormData(form);
+
+    fetch('<?= base_url('consultas/enviar') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalConsultaProfesor'));
+            modal.hide();
+
+            // Mostrar mensaje de éxito
+            Swal.fire({
+                icon: 'success',
+                title: 'Enviado con éxito',
+                text: 'A la brevedad recibirás la respuesta',
+                confirmButtonText: 'Aceptar'
+            });
+
+            // Limpiar formulario
+            form.reset();
+        } else {
+            // Mostrar errores de validación
+            if (data.errors) {
+                const errorDiv = document.getElementById('consultaErrorsProf');
+                let errorHtml = '<ul class="mb-0">';
+                for (const [field, message] of Object.entries(data.errors)) {
+                    errorHtml += `<li>${message}</li>`;
+                }
+                errorHtml += '</ul>';
+                errorDiv.innerHTML = errorHtml;
+                errorDiv.classList.remove('d-none');
+            } else {
+                // Mostrar mensaje de error general
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Error al enviar la consulta',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al enviar la consulta. Inténtalo de nuevo.',
+            confirmButtonText: 'Aceptar'
+        });
+    });
+});
+</script>
 <?= $this->endSection() ?>
