@@ -1005,7 +1005,7 @@ abstract class BaseModel
         // doProtectFields() can further remove elements from
         // $row, so we need to check for empty dataset again
         if ($row === []) {
-            throw DataException::forEmptyDataset('update');
+            return false;
         }
 
         $row = $this->setUpdatedField($row, $this->setDate());

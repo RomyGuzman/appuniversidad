@@ -12,6 +12,7 @@ class UsuarioModel extends Model
         'usuario',
         'password',
         'rol_id',
-        'activo'
+        'activo',
+        'fecha_ultimo_ingreso'
     ];
 }
