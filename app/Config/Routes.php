@@ -105,7 +105,7 @@ $routes->group('administrador', ['filter' => 'admin'], static function ($routes)
 
     // --- Gestión de Roles ---
     $routes->get('rol', 'Rol::index');
-    $routes->post('rol/store', 'Rol::registrar');
+    $routes->post('rol/registrar', 'Rol::registrar');
     $routes->get('rol/edit/(:num)', 'Rol::edit/$1');
     $routes->post('rol/update/(:num)', 'Rol::update/$1');
     $routes->post('rol/delete/(:num)', 'Rol::delete/$1');

@@ -66,10 +66,10 @@
                                     </thead>
                                     <tbody>
                                         <?php foreach ($consultas as $consulta): ?>
-                                            <tr id="consulta-row-<?= esc($consulta->id_consulta) ?>" class="shadow-sm <?= $consulta->estado === 'resuelta' ? 'table-secondary text-muted' : '' ?>">
+                                            <tr id="consulta-row-<?= esc($consulta->id_consulta) ?>" class="shadow-sm <?= $consulta->estado === 'respondida' ? 'table-secondary text-muted' : '' ?>">
                                                 <td>
-                                                    <?php if ($consulta->estado === 'resuelta'): ?>
-                                                        <i class="fas fa-check-circle text-success" title="Resuelta"></i>
+                                                    <?php if ($consulta->estado === 'respondida'): ?>
+                                                        <i class="fas fa-check-circle text-success" title="Respondida"></i>
                                                     <?php else: ?>
                                                         <span class="text-warning" title="Pendiente">Pendiente</span>
                                                     <?php endif; ?>

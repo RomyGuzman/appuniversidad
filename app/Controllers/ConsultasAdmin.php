@@ -44,9 +44,13 @@ class ConsultasAdmin extends BaseController
             $consultaModel = new ConsultaAdminModel();
             $consulta = $consultaModel->find($id);
 
-            if ($consulta && $consultaModel->update($id, ['estado' => 'resuelta'])) {
-                // Devuelve una respuesta exitosa. El JS se encargará de actualizar el contador.
-                return $this->response->setJSON(['success' => true, 'message' => 'Consulta marcada como resuelta.']);
+            if ($consulta && $consultaModel->update($id, ['estado' => 'respondida'])) {
+                // Devuelve una respuesta exitosa con el nuevo token CSRF. El JS se encargará de actualizar el contador.
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Consulta marcada como resuelta.',
+                    'csrf_hash' => csrf_hash()
+                ]);
             }
 
             return $this->response->setJSON(['success' => false, 'message' => 'No se pudo actualizar o encontrar la consulta.']);

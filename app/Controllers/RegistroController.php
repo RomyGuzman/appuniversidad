@@ -22,10 +22,10 @@ class RegistroController extends Controller
     {
         $validation = \Config\Services::validation();
         $validation->setRules([
-            'dni' => 'required|exact_length[8]|is_unique[Estudiante.dni]',
+            'dni' => 'required|exact_length[8]',
             'nombre_estudiante' => 'required|max_length[80]',
             'fecha_nacimiento' => 'required|valid_date',
-            'email' => 'required|valid_email|is_unique[Estudiante.email]',
+            'email' => 'required|valid_email',
             'carrera_id' => 'required|is_not_unique[Carrera.id]'
         ]);
 
@@ -56,8 +56,8 @@ class RegistroController extends Controller
         // ✅ Crear el usuario automáticamente
         $dataUsuario = [
             'usuario'  => $email,
-            'password' => password_hash($dni, PASSWORD_DEFAULT),
-            'rol_id'   => 4,
+            'password' => md5($dni),
+            'rol_id'   => 3,
             'activo'   => 1
         ];
 
