@@ -136,25 +136,24 @@
                                                 <?php foreach($carreras as $car): ?>
                                                     <option value="<?= esc($car['id']) ?>">
                                                         <?= esc($car['nombre_carrera']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-search me-1"></i> Buscar
-                                        </button>
-                                    </div>
-                                    <div id="validationAlert-searchStudentByCareerForm" class="text-danger text-sm mt-2 d-none"></div>
-                                </form>
-                                <div id="clearCareerResultsContainer" class="text-center mt-3 d-none">
-                                    <button id="clearCareerResultsBtn" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i> Limpiar Búsqueda
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-1"></i> Buscar
                                     </button>
                                 </div>
-                                <div id="studentsByCareerResults" class="row mt-4 g-3"></div>
+                                <div id="validationAlert-searchStudentByCareerForm" class="text-danger text-sm mt-2 d-none"></div>
+                            </form>
+                            <div id="clearCareerResultsContainer" class="text-center mt-3 d-none">
+                                <button id="clearCareerResultsBtn" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i> Limpiar Búsqueda
+                                </button>
                             </div>
+                            <div id="studentsByCareerResults" class="row mt-4 g-3"></div>
                         </div>
                     </div>
                 </div>
@@ -201,7 +200,7 @@
                                                     </button>
                                                     <form action="<?= base_url('estudiantes/delete/' . $est['id']) ?>" method="post" class="d-inline delete-form">
                                                         <?= csrf_field() ?>
-                                                        <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Marcar como borrado (soft delete)">
                                                             <i class="fas fa-trash-alt"></i>
                                                         </button>
                                                     </form>
