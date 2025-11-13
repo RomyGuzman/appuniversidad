@@ -177,7 +177,6 @@
                                        <th>ID</th>
                                             <th>Nombre</th>
                                             <th>DNI</th>
-                                            <th>Edad</th>
                                             <th>Email</th>
                                             <th>Carrera</th>
                                            <th>Acciones</th>
@@ -192,7 +191,6 @@
                                                 <td><?= esc($est['id']) ?></td>
                                                 <td><?= esc($est['nombre_estudiante']) ?></td>
                                                 <td><?= esc($est['dni']) ?></td>
-                                                <td><?= esc($est['edad']) ?></td>
                                                 <td><?= esc($est['email']) ?></td>
                                                 <td><?= esc($est['nombre_carrera']) ?></td>
                                                 <td>
@@ -209,7 +207,7 @@
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr><td colspan="7" class="text-center">No hay estudiantes registrados.</td></tr>
+                                        <tr><td colspan="6" class="text-center">No hay estudiantes registrados.</td></tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
@@ -240,10 +238,7 @@
                             <label for="edit_dni" class="form-label">DNI</label>
                             <input type="text" class="form-control" id="edit_dni" name="dni" pattern="\d{8}" maxlength="8" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="edit_edad" class="form-label">Edad</label>
-                            <input type="text" class="form-control" id="edit_edad" name="edad" maxlength="2" required>
-                        </div>
+
                         <div class="mb-3">
                             <label for="edit_email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="edit_email" name="email" required>

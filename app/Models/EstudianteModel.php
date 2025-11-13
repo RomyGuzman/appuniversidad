@@ -13,11 +13,11 @@ class EstudianteModel extends Model
     // --- Propiedades de Configuración del Modelo ---
 
     // Especifica la tabla de la base de datos que este modelo representa.
-    protected $table      = 'Estudiante';
+    protected $table      = 'estudiante';
     // Especifica el nombre de la columna que es la clave primaria.
     protected $primaryKey = 'id';
     // Define los campos que se pueden insertar o actualizar masivamente.
-    protected $allowedFields = ['id', 'dni','nombre_estudiante','fecha_nacimiento','edad','email','carrera_id'];
+    protected $allowedFields = ['id', 'dni','nombre_estudiante','fecha_nacimiento','email','carrera_id'];
     // Desactiva los campos de timestamp automáticos ('created_at', 'updated_at').
     protected $useTimestamps = false;
 
@@ -25,12 +25,12 @@ class EstudianteModel extends Model
     protected $validationRules = [
         // 'id' no es requerido para la creación.
         'id' => 'permit_empty|integer', // Cambiado a permit_empty para permitir la creación
-        // 'dni' es obligatorio, debe tener exactamente 8 dígitos numéricos y ser único en la tabla.
-        'dni'   => 'required|regex_match[/^[0-9]{8}$/]|is_unique[Estudiante.dni,id,{id}]',
+        // 'dni' es obligatorio, debe tener exactamente 8 dígitos numéricos.
+        'dni'   => 'required|regex_match[/^[0-9]{8}$/]',
         // 'nombre_estudiante' es obligatorio, con una longitud entre 2 y 80 caracteres.
         'nombre_estudiante'  => 'required|min_length[2]|max_length[80]',
         // 'edad' es obligatorio y debe ser un número de 1 o 2 dígitos.
-        'edad'  => 'required|regex_match[/^[0-9]{1,2}$/]',
+        'edad'  => 'permit_empty|regex_match[/^[0-9]{1,2}$/]',
         // 'email' es obligatorio, debe ser un formato de email válido y tener un máximo de 50 caracteres.
         'email' => 'required|valid_email|max_length[50]',
     ];
@@ -59,8 +59,8 @@ class EstudianteModel extends Model
     public function getEstudiantesConCarrera()
     {
         // Construye una consulta SELECT que une la tabla 'Estudiante' con 'Carrera'.
-        return $this->select('Estudiante.*, Carrera.nombre_carrera')
-            ->join('Carrera', 'Carrera.id = Estudiante.carrera_id', 'left') // 'left' join para incluir estudiantes sin carrera.
+        return $this->select('estudiante.*, carrera.nombre_carrera')
+            ->join('carrera', 'carrera.id = estudiante.carrera_id', 'left') // 'left' join para incluir estudiantes sin carrera.
             ->findAll(); // Ejecuta la consulta y devuelve todos los resultados.
     }
 
@@ -72,8 +72,8 @@ class EstudianteModel extends Model
     public function getEstudianteConCarrera($id)
     {
         // Construye la misma consulta que el método anterior, pero para un solo registro.
-        return $this->select('Estudiante.*, Carrera.nombre_carrera')
-            ->join('Carrera', 'Carrera.id = Estudiante.carrera_id', 'left')
+        return $this->select('estudiante.*, carrera.nombre_carrera')
+            ->join('carrera', 'carrera.id = estudiante.carrera_id', 'left')
             ->find($id); // Ejecuta la consulta y devuelve solo el registro que coincide con el ID.
     }
 
@@ -85,9 +85,9 @@ class EstudianteModel extends Model
     public function getEstudiantesPorCarrera($careerId)
     {
         // Filtra los estudiantes por la columna 'carrera_id' y une con Carrera para obtener el nombre.
-        return $this->select('Estudiante.*, Carrera.nombre_carrera')
-            ->join('Carrera', 'Carrera.id = Estudiante.carrera_id', 'left')
-            ->where('Estudiante.carrera_id', $careerId)
+        return $this->select('estudiante.*, carrera.nombre_carrera')
+            ->join('carrera', 'carrera.id = estudiante.carrera_id', 'left')
+            ->where('estudiante.carrera_id', $careerId)
             ->findAll(); // Devuelve todos los estudiantes que coinciden con el filtro.
     }
 
@@ -98,10 +98,10 @@ class EstudianteModel extends Model
      */
     public function getNotas($id_est)
     {
-        return $this->db->table('Nota')
-            ->select('Nota.*, Materia.nombre_materia')
-            ->join('Materia', 'Materia.id = Nota.materia_id')
-            ->where('Nota.estudiante_id', $id_est)
+        return $this->db->table('nota')
+            ->select('nota.*, materia.nombre_materia')
+            ->join('materia', 'materia.id = nota.materia_id')
+            ->where('nota.estudiante_id', $id_est)
             ->get()
             ->getResultArray();
     }
@@ -113,10 +113,10 @@ class EstudianteModel extends Model
      */
     public function getMateriasInscritas($id_est)
     {
-        return $this->db->table('Inscripcion')
-            ->select('Inscripcion.*, Materia.nombre_materia, Materia.codigo_materia, Materia.id as materia_id')
-            ->join('Materia', 'Materia.id = Inscripcion.materia_id')
-            ->where('Inscripcion.estudiante_id', $id_est)
+        return $this->db->table('inscripcion')
+            ->select('inscripcion.*, materia.nombre_materia, materia.codigo_materia, materia.id as materia_id')
+            ->join('materia', 'materia.id = inscripcion.materia_id')
+            ->where('inscripcion.estudiante_id', $id_est)
             ->get()
             ->getResultArray();
     }

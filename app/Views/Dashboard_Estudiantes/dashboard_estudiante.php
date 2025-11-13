@@ -4,52 +4,227 @@
     Dashboard - <?= esc($estudiante['nombre_estudiante'] ?? 'Estudiante') ?>
 <?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard de estudiante cargado correctamente.');
+
+    // Verificar notificaciones al cargar la página
+    const notificaciones = <?= json_encode(session()->get('notificaciones') ?? []) ?>;
+    const usuarioId = <?= esc($estudiante['id'] ?? 0) ?>;
+
+    // Filtrar notificaciones para este usuario
+    const notificacionesUsuario = notificaciones.filter(n => n.usuario_id == usuarioId && n.tipo === 'consulta_resuelta');
+
+    if (notificacionesUsuario.length > 0) {
+        // Mostrar la primera notificación (o la más reciente)
+        const notif = notificacionesUsuario[0];
+        Swal.fire({
+            icon: 'info',
+            title: notif.titulo,
+            text: notif.mensaje,
+            confirmButtonText: 'Aceptar'
+        });
+
+        // Limpiar notificaciones después de mostrar (eliminar de la sesión)
+        // Esto se hace eliminando las notificaciones del usuario de la sesión
+        fetch('<?= base_url('notificaciones/limpiar') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ usuario_id: usuarioId })
+        }).catch(err => console.log('Error al limpiar notificaciones:', err));
+    }
+});
+</script>
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <p class="text-muted mb-0 small">Panel de Gestión</p>
-            <h2 class="mb-0">Mis Materias</h2>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <h5 class="mb-0 text-muted">Bienvenido, <?= esc($estudiante['nombre_estudiante'] ?? 'Estudiante') ?></h5>
-            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalConsultaEstudiante">
-                <i class="fas fa-envelope me-2"></i>Contactar al Administrador
-            </button>
+<div class="container-fluid">
+    <!-- Header Principal -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted mb-1 small">Panel de Gestión Académica</p>
+                    <h1 class="mb-2">Dashboard Estudiantil</h1>
+                    <h3 class="text-primary mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        <?= esc($estudiante['nombre_carrera'] ?? 'Carrera no asignada') ?>
+                    </h3>
+                </div>
+                <div class="text-end">
+                    <h6 class="mb-2 text-muted fs-6">BIENVENIDO, <?= strtoupper(esc($estudiante['nombre_estudiante'] ?? 'Estudiante')) ?></h6>
+                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalConsultaEstudiante">
+                        <i class="fas fa-envelope me-2"></i>Contactar al Administrador
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Columna Lateral: Perfil y Estadísticas -->
+    <!-- Perfil y Estadísticas -->
+    <div class="row mb-4">
         <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-graduate me-2"></i>Mi Perfil</h5>
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user-graduate me-2"></i>Mi Perfil</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong class="text-muted d-block small">NOMBRE COMPLETO</strong>
+                                <span class="fs-6"><?= esc($estudiante['nombre_estudiante'] ?? 'No disponible') ?></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong class="text-muted d-block small">DNI</strong>
+                                <span class="fs-6"><?= esc($estudiante['dni'] ?? 'No disponible') ?></span>
+                            </div>
+                            <div class="mb-0">
+                                <strong class="text-muted d-block small">CARRERA</strong>
+                                <span class="fs-6 text-primary fw-bold"><?= esc($estudiante['nombre_carrera'] ?? 'No asignada') ?></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p><strong>Nombre:</strong><br><?= esc($estudiante['nombre_estudiante'] ?? 'No disponible') ?></p>
-                    <p><strong>DNI:</strong><br><?= esc($estudiante['dni'] ?? 'No disponible') ?></p>
-                    <p><strong>Carrera:</strong><br><?= esc($estudiante['nombre_carrera'] ?? 'No asignada') ?></p>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Mis Estadísticas</h5>
-                </div>
-                <div class="card-body text-center">
-                    <h3 class="text-primary"><?= esc(number_format($estadisticas['promedio_general'] ?? 0, 2)) ?></h3>
-                    <p class="small text-muted mb-0">Promedio General</p>
-                    <hr>
-                    <h3 class="text-success"><?= esc($estadisticas['materias_aprobadas'] ?? 0) ?></h3>
-                    <p class="small text-muted mb-0">Materias Aprobadas</p>
+                <div class="col-12">
+                    <div class="card h-100">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Estadísticas</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <h2 class="text-primary mb-1"><?= esc(number_format($estadisticas['promedio_general'] ?? 0, 2)) ?></h2>
+                                <p class="small text-muted mb-0">Promedio General</p>
+                            </div>
+                            <hr class="my-2">
+                            <div>
+                                <h2 class="text-success mb-1"><?= esc($estadisticas['materias_aprobadas'] ?? 0) ?></h2>
+                                <p class="small text-muted mb-0">Materias Aprobadas</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Columna Principal: Materias -->
         <div class="col-lg-8">
-            <h3 class="mb-4">Materias Inscritas</h3>
+            <!-- Sección Unificada de Gestión de Materias -->
+            <div class="materias-section">
+                <!-- Header Principal de la Sección -->
+                <div class="mb-4">
+                    <h2 class="text-primary"><i class="fas fa-book-open me-2"></i>Gestión de Materias Académicas</h2>
+                    <p class="text-muted">Aquí puedes inscribirte en nuevas materias y gestionar las que ya cursas.</p>
+                </div>
+
+                <!-- Materias Disponibles -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Materias Disponibles para Inscripción</h5>
+                            </div>
+                            <div class="card-body">
+                                <?php if (!empty($materias_disponibles)): ?>
+                                    <div class="accordion" id="accordionDisponibles">
+                                        <?php foreach ($materias_disponibles as $index => $materia): ?>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header bg-light" id="headingDisp<?= $materia['id'] ?>">
+                                                    <button class="accordion-button bg-light <?= $index > 0 ? 'collapsed' : '' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDisp<?= $materia['id'] ?>" aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>" aria-controls="collapseDisp<?= $materia['id'] ?>">
+                                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                                            <div>
+                                                                <strong class="fs-5 text-primary"><?= esc($materia['nombre_materia']) ?></strong>
+                                                                <br>
+                                                                <small class="text-muted">Código: <?= esc($materia['codigo_materia']) ?></small>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseDisp<?= $materia['id'] ?>" class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>" aria-labelledby="headingDisp<?= $materia['id'] ?>" data-bs-parent="#accordionDisponibles">
+                                                    <div class="accordion-body bg-white border-top">
+                                                        <div class="row">
+                                                            <div class="col-md-8">
+                                                                <h6>Descripción</h6>
+                                                                <p class="text-muted mb-3">
+                                                                    <?= esc($materia['descripcion_materia'] ?? 'Sin descripción disponible') ?>
+                                                                </p>
+
+                                                                <h6>Información</h6>
+                                                                <div class="row">
+                                                                    <div class="col-sm-6">
+                                                                        <p class="mb-1"><strong>Horas semanales:</strong> <?= esc($materia['horas_semanales'] ?? 'N/A') ?>h</p>
+                                                                        <p class="mb-1"><strong>Modalidad:</strong> <?= esc($materia['modalidad'] ?? 'N/A') ?></p>
+                                                                    </div>
+                                                                    <div class="col-sm-6">
+                                                                        <p class="mb-1"><strong>Cupo máximo:</strong> <?= esc($materia['cupo_maximo'] ?? 'N/A') ?> estudiantes</p>
+                                                                        <p class="mb-1"><strong>Estado actual:</strong>
+                                                                            <span class="badge bg-<?= str_replace(['inscribirme', 'ya_inscrito', 'no_curso'], ['primary', 'secondary', 'warning'], $materia['estado']) ?>">
+                                                                                <?= esc($materia['boton_texto']) ?>
+                                                                            </span>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="card border-info">
+                                                                    <div class="card-body text-center">
+                                                                        <h6 class="card-title text-info">¿Qué hacer?</h6>
+                                                                        <?php if ($materia['estado'] == 'inscribirme'): ?>
+                                                                            <button type="button"
+                                                                                    class="btn btn-primary btn-sm mb-2"
+                                                                                    onclick="inscribirMateria(<?= $materia['id'] ?>, '<?= esc($materia['estado']) ?>')">
+                                                                                <i class="fas fa-plus me-1"></i>Inscribirme
+                                                                            </button>
+                                                                            <p class="mb-0 small">Haz click para comenzar a cursar esta materia.</p>
+                                                                        <?php elseif ($materia['estado'] == 'no_curso'): ?>
+                                                                            <button type="button"
+                                                                                    class="btn btn-warning btn-sm mb-2"
+                                                                                    onclick="inscribirMateria(<?= $materia['id'] ?>, '<?= esc($materia['estado']) ?>')">
+                                                                                <i class="fas fa-redo me-1"></i>Reintentar
+                                                                            </button>
+                                                                            <p class="mb-0 small">Puedes reintentar esta materia. ¡Ánimo!</p>
+                                                                        <?php elseif ($materia['estado'] == 'ya_inscrito'): ?>
+                                                                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                                                            <p class="mb-0 small">Ya estás inscrito en esta materia.</p>
+                                                                        <?php else: ?>
+                                                                            <button type="button"
+                                                                                    class="btn btn-primary btn-sm mb-2"
+                                                                                    onclick="inscribirMateria(<?= $materia['id'] ?>, 'inscribirme')">
+                                                                                <i class="fas fa-plus me-1"></i>Inscribirme
+                                                                            </button>
+                                                                            <p class="mb-0 small">Haz click para comenzar a cursar esta materia.</p>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-info text-center">
+                                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                        <h5>No hay materias disponibles</h5>
+                                        <p class="mb-0">No se encontraron materias para tu carrera en este momento.</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materias Inscritas -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Materias en las que estás inscrito</h5>
+                    </div>
+                    <div class="card-body">
             <div class="accordion" id="accordionMaterias">
                 <?php if (!empty($materias_inscritas)): ?>
                     <?php foreach ($materias_inscritas as $index => $materia): ?>
@@ -225,8 +400,14 @@
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="alert alert-info">No te has inscrito a ninguna materia todavía.</div>
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <h5>No tienes materias inscritas</h5>
+                        <p class="mb-0">Inscríbete en las materias disponibles arriba.</p>
+                    </div>
                 <?php endif; ?>
+            </div>
+        </div>
             </div>
         </div>
     </div>
@@ -275,6 +456,85 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard de estudiante cargado correctamente.');
 });
+
+// NUEVO: Función para inscribir materia
+function inscribirMateria(materiaId, estado) {
+    console.log('=== INICIANDO FUNCIÓN inscribirMateria ===');
+    console.log('Materia ID:', materiaId, 'Estado:', estado);
+    console.log('Base URL configurado:', '<?= base_url() ?>');
+
+    // Mostrar confirmación
+    Swal.fire({
+        title: '¿Confirmar inscripción?',
+        text: '¿Estás seguro de que quieres inscribirte en esta materia?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#007bff',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, inscribirme',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mostrar loading
+            Swal.fire({
+                title: 'Procesando...',
+                text: 'Inscribiendo materia',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Enviar petición AJAX
+            fetch('<?= base_url('estudiantes/inscribir') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'materia_id=' + encodeURIComponent(materiaId)
+            })
+            .then(response => {
+                console.log('Respuesta del servidor:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Datos recibidos:', data);
+
+                if (data.success) {
+                    // Éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Inscripción exitosa!',
+                        text: data.message || 'Te has inscrito correctamente en la materia.',
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
+                        // Recargar la página para actualizar el estado
+                        location.reload();
+                    });
+                } else {
+                    // Error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la inscripción',
+                        text: data.error || 'No se pudo completar la inscripción. Inténtalo de nuevo.',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
+                    confirmButtonText: 'Aceptar'
+                });
+            });
+        }
+    });
+}
 
 // Manejar el envío del formulario de consulta
 document.getElementById('formConsultaEstudiante').addEventListener('submit', function(e) {

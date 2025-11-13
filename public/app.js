@@ -4,7 +4,32 @@
 
 // --- INICIO: Inicialización de DataTables ---
 if ($.fn.DataTable) {
-    $('#careersTable').DataTable();
+    // Inicializar DataTables para todas las tablas del panel de administradores
+    // Ocultar la columna ID (primera columna) en todas las tablas
+    $('#careersTable').DataTable({
+        columnDefs: []
+    });
+    $('#studentsTable').DataTable({
+        columnDefs: [{ targets: 0, visible: false }]
+    });
+    $('#profsTable').DataTable({
+        columnDefs: []
+    });
+    $('#usuariosTable').DataTable({
+        columnDefs: [{ targets: 0, visible: false }]
+    });
+    $('#categoriesTable').DataTable({
+        columnDefs: [{ targets: 0, visible: false }]
+    });
+    $('#modalidadesTable').DataTable({
+        columnDefs: [{ targets: 0, visible: false }]
+    });
+    $('#rolesTable').DataTable({
+        columnDefs: [{ targets: 0, visible: false }]
+    });
+    $('#materiasTable').DataTable({
+        columnDefs: [{ targets: 0, visible: false }]
+    });
 }
 // --- FIN: Inicialización de DataTables ---
 
@@ -187,6 +212,49 @@ $(document).ready(function () {
         });
     });
 
+    // Evento para buscar profesor por nombre y mostrar legajo
+    $('#nombre_profesor').on('input', function() {
+        const nombreProfesor = $(this).val().trim();
+        const legajoField = $('#legajo');
+
+        if (nombreProfesor.length < 2) {
+            legajoField.val('');
+            return;
+        }
+
+        // Debounce para evitar llamadas excesivas
+        clearTimeout(window.profesorSearchTimeout);
+        window.profesorSearchTimeout = setTimeout(() => {
+            $.ajax({
+                url: `${BASE_URL}administrador/profesores/buscarProfesorPorNombre`,
+                type: 'POST',
+                data: {
+                    nombre_profesor: nombreProfesor,
+                    csrf_test_name: $('input[name=csrf_test_name]').val()
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.existe) {
+                        // Si existe, mostrar el legajo existente y mostrar alerta
+                        legajoField.val(response.legajo);
+                        Swal.fire({
+                            title: 'Profesor ya registrado',
+                            text: response.mensaje,
+                            icon: 'info',
+                            confirmButtonText: 'Entendido'
+                        });
+                    } else {
+                        // Si no existe, generar nuevo legajo
+                        legajoField.val(response.legajo);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al buscar profesor:', xhr.responseText);
+                }
+            });
+        }, 500);
+    });
+
     // --- Lógica para Usuarios ---
 
     // Evento de clic para los botones de "Editar" en la tabla de usuarios.
@@ -358,7 +426,7 @@ $(document).ready(function () {
         const careerId = $(this).data('id');
 
         $.ajax({
-            url: `${BASE_URL}carreras/edit/${careerId}`,
+            url: `${BASE_URL}administrador/carreras/edit/${careerId}`,
             type: 'GET',
             dataType: 'json',
             success: function(response) {
@@ -367,12 +435,12 @@ $(document).ready(function () {
                 $('#edit_ncar').val(response.nombre_carrera);
                 $('#edit_codcar').val(response.codigo_carrera);
                 $('#edit_duracion').val(response.duracion);
-                $('#edit_id_cat').val(response.id_categoria);
-                $('#edit_modalidad').val(response.id_modalidad);
-                $('#edit_id_persona').val(response.id_persona);
-                $('#editCareerForm').attr('action', `${BASE_URL}carreras/update/${careerId}`);
+                $('#edit_categoria').val(response.categoria_id);
+                $('#edit_modalidad').val(response.modalidad_id);
+                $('#editCareerForm').attr('action', `${BASE_URL}administrador/carreras/update/${careerId}`);
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('Error AJAX:', xhr.responseText, status, error);
                 Swal.fire('Error', 'No se pudieron cargar los datos de la carrera.', 'error');
             }
         });
@@ -636,11 +704,16 @@ $(document).ready(function () {
     }
 
     if (window.APP_CONFIG.flash.error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: window.APP_CONFIG.flash.error
-        });
+        // Para la página de agregar materias, mostrar el error sin SweetAlert
+        if (window.location.pathname.includes('administrador/materias')) {
+            // El error ya se muestra en la vista como alert HTML, no hacer nada aquí
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: window.APP_CONFIG.flash.error
+            });
+        }
     }
 
     // Lógica para el botón de toggle test
@@ -658,6 +731,13 @@ $(document).ready(function () {
     // --- Lógica para selección de carrera en página de materias ---
     $('#carreraSelect').on('change', function() {
         const selectedCarreraId = $(this).val();
+        const url = `${BASE_URL}administrador/materias${selectedCarreraId ? '?carrera_id=' + selectedCarreraId : ''}`;
+        window.location.href = url;
+    });
+
+    // --- Lógica para el botón de recargar en página de materias ---
+    $('#refreshMateriasBtn').on('click', function() {
+        const selectedCarreraId = $('#carreraSelect').val();
         const url = `${BASE_URL}administrador/materias${selectedCarreraId ? '?carrera_id=' + selectedCarreraId : ''}`;
         window.location.href = url;
     });

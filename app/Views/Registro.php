@@ -173,6 +173,15 @@
                 confirmButtonText: 'Aceptar'
             });
         <?php endif; ?>
+
+        <?php if (session()->has('dni_duplicado') && session('dni_duplicado')): ?>
+            Swal.fire({
+                title: 'DNI Duplicado',
+                text: 'Ya estás registrado, DNI encontrado en el sistema.',
+                icon: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+        <?php endif; ?>
     </script>
 </body>
 </html>

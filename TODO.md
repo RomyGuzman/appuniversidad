@@ -1,2 +1,7 @@
 - [x] Cambiar verificación de contraseña en Auth.php de password_verify() a md5()
 - [x] Actualizar contraseña de "admin" en appuniversidad (2).json a MD5 de "123456"
+- [x] Agregar 'materia_id' a $allowedFields en ProfesorModel.php
+- [x] Modificar Profesores::index() para cargar $materias y pasar a vista
+- [x] Agregar método assignMateria() en Profesores controller
+- [x] Agregar ruta POST 'profesores/assign-materia' en Routes.php
+- [x] Agregar formulario de asignación en profesores.php vista

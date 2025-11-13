@@ -6,6 +6,7 @@ use App\Models\RegistroEstudianteModel;
 use App\Models\CarreraModel;
 use App\Models\UsuarioModel;
 use CodeIgniter\Controller;
+use CodeIgniter\Database\Exceptions\DatabaseException;
 
 class RegistroController extends Controller
 {
@@ -49,8 +50,18 @@ class RegistroController extends Controller
         ];
 
         // ✅ Guardar estudiante
-        if (!$registroEstudianteModel->insert($dataEstudiante)) {
-            return redirect()->back()->withInput()->with('errors', $registroEstudianteModel->errors());
+        try {
+            if (!$registroEstudianteModel->insert($dataEstudiante)) {
+                return redirect()->back()->withInput()->with('errors', $registroEstudianteModel->errors());
+            }
+        } catch (DatabaseException $e) {
+            // Verificar si es un error de entrada duplicada
+            if ($e->getCode() == 1062) {
+                return redirect()->back()->withInput()->with('dni_duplicado', true);
+            } else {
+                // Para otros errores de base de datos, mostrar el error genérico
+                return redirect()->back()->withInput()->with('errors', ['Error en la base de datos: ' . $e->getMessage()]);
+            }
         }
 
         // ✅ Crear el usuario automáticamente

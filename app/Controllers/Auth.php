@@ -102,7 +102,7 @@ class Auth extends BaseController
         switch ($rol_id) {
             case 1: // admin
             case 4: // Superadmin
-                return 'administrador/usuarios';
+                return 'administrador/administradores';
             case 2: // profesor
                 return 'profesores/dashboard';
             case 3: // alumno

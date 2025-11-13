@@ -43,6 +43,19 @@
                                 </ul>
                             </div>
                         <?php endif ?>
+                        <?php if (session()->has('error')): ?>
+                            <div class="alert alert-danger" id="errorAlert">
+                                <?= esc(session('error')) ?>
+                            </div>
+                            <script>
+                                setTimeout(function() {
+                                    const alert = document.getElementById('errorAlert');
+                                    if (alert) {
+                                        alert.style.display = 'none';
+                                    }
+                                }, 10000); // 10 segundos
+                            </script>
+                        <?php endif ?>
                         <div class="mb-3">
                             <label for="carreraSelect" class="form-label">Seleccionar Carrera</label>
                             <select class="form-control" id="carreraSelect">
@@ -55,12 +68,13 @@
                             </select>
                             <input type="hidden" id="selectedCarreraId" name="carrera_id" value="<?= esc($selectedCarrera) ?>" />
                         </div>
-                        <?php if (!isset($selectedCarrera) || !$selectedCarrera): ?>
+
+                        <?php if (!isset($selectedCarrera) || $selectedCarrera === '' || $selectedCarrera === null): ?>
                             <div class="alert alert-warning text-center">
                                 Por favor, busque y seleccione una carrera para poder agregar materias.
                             </div>
                         <?php else: ?>
-                        <form id="materiaForm" method="post" action="<?= base_url('materias/registrar') ?>">
+                        <form id="materiaForm" method="post" action="<?= base_url('administrador/materias/registrar') ?>">
                             <?= csrf_field() ?>
                             <input type="hidden" name="carrera_id" value="<?= esc($selectedCarrera) ?>" />
                             <div class="mb-3">
@@ -162,7 +176,7 @@
                                                     <button class="btn btn-info btn-sm edit-btn" data-id="<?= esc($materia['id']) ?>" data-bs-toggle="modal" data-bs-target="#editMateriaModal">
                                                         <i class="fas fa-pencil-alt"></i>
                                                     </button>
-                                                    <form action="<?= base_url('materias/delete/' . $materia['id']) ?>" method="post" class="d-inline delete-form">
+                                                    <form action="<?= base_url('administrador/materias/delete/' . $materia['id']) ?>" method="post" class="d-inline delete-form">
                                                         <?= csrf_field() ?>
                                                         <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
                                                             <i class="fas fa-trash-alt"></i>

@@ -6,14 +6,14 @@ use CodeIgniter\Model;
 
 class MateriaModel extends Model
 {
-    protected $table      = 'Materia';
+    protected $table      = 'materia';
     protected $primaryKey = 'id';
     protected $allowedFields = ['nombre_materia', 'codigo_materia', 'carrera_id'];
     protected $useTimestamps = false;
 
     protected $validationRules = [
         'nombre_materia' => 'required|min_length[2]|max_length[120]',
-        'codigo_materia' => 'required|min_length[2]|max_length[20]|is_unique[Materia.codigo_materia,id,{id}]',
+        'codigo_materia' => 'required|min_length[2]|max_length[20]|is_unique[materia.codigo_materia,id,{id}]',
         'carrera_id' => 'required|integer',
     ];
 

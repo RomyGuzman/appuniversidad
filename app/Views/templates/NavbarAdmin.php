@@ -68,9 +68,41 @@
             <li class="nav-item" role="presentation">
                 <a class="nav-link text-white <?= (uri_string() == 'administrador/alertas') ? 'active bg-light text-dark' : '' ?>" href="<?= base_url('administrador/alertas'); ?>" role="tab" aria-selected="false">
                     Alertas
-                    <span class="badge bg-danger ms-1 d-none" id="alerta-contador">0</span>
+                    <span class="badge bg-danger ms-1" id="alerta-contador">0</span>
                 </a>
             </li>
         </ul>
     </div>
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para actualizar el contador de alertas
+    function actualizarContadorAlertas() {
+        fetch('<?= base_url('administrador/alertas/count') ?>', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const contador = document.getElementById('alerta-contador');
+            if (data.unread_count > 0) {
+                contador.textContent = data.unread_count;
+                contador.classList.remove('d-none');
+            } else {
+                contador.textContent = '0';
+                contador.classList.add('d-none');
+            }
+        })
+        .catch(error => console.log('Error al actualizar contador:', error));
+    }
+
+    // Actualizar contador al cargar la página
+    actualizarContadorAlertas();
+
+    // Actualizar contador cada 30 segundos
+    setInterval(actualizarContadorAlertas, 30000);
+});
+</script>

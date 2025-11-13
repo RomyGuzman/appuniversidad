@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 // Importa los modelos que este controlador necesita para funcionar.
 use App\Models\ProfesorModel;
 use App\Models\CarreraModel;
+use App\Models\MateriaModel;
 
 /**
  * Este es el "director de orquesta" para todo lo relacionado con los profesores.
@@ -29,14 +30,17 @@ class Profesores extends BaseController
             // Instancia los modelos necesarios.
             $profesorModel = new ProfesorModel();
             $carreraModel = new CarreraModel();
+            $materiaModel = new \App\Models\MateriaModel();
 
             // Prepara un array '$data' para pasar información a la vista.
             $data['profesores'] = $profesorModel->getProfesores();
             $data['carreras'] = $carreraModel->findAll();
+            $data['materias'] = $materiaModel->findAll();
         } catch (\Exception $e) {
             // Si hay error, mostramos la vista con datos vacíos.
             $data['profesores'] = [];
             $data['carreras'] = [];
+            $data['materias'] = [];
         }
 
         // Carga la vista 'profesores.php' y le pasa el array '$data'.
@@ -56,25 +60,112 @@ class Profesores extends BaseController
      * 4. Si todo es correcto, redirige a la página de profesores con un mensaje de éxito.
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
-    public function registrar()
+    public function create()
     {
         $profesorModel = new ProfesorModel();
 
+        $nombreProfesor = $this->request->getPost('nombre_profesor');
+        $legajo = $this->request->getPost('legajo');
+
+        // Verificar si el profesor ya existe
+        $profesorExistente = $profesorModel->where('nombre_profesor', $nombreProfesor)->first();
+        if ($profesorExistente) {
+            return redirect()->to('/administrador/profesores')->withInput()->with('errors', ['El profesor ya está registrado en el sistema.']);
+        }
+
         // Recoge los datos del formulario usando el objeto 'request'.
         $data = [
-            'legajo' => $this->request->getPost('legajo'),
-            'nombre_profesor'  => $this->request->getPost('nombre_profesor'),
+            'legajo' => $legajo,
+            'nombre_profesor'  => $nombreProfesor,
             'carrera_id' => $this->request->getPost('carrera_id'),
         ];
 
         // Intenta guardar los datos. El modelo se encarga de la validación.
         if ($profesorModel->save($data) === false) {
             // Si la validación falla, redirige hacia atrás con los errores.
-            return redirect()->to('/profesores')->withInput()->with('errors', 'Error al registrar: ' . implode(', ', $profesorModel->errors()));
+            return redirect()->to('/administrador/profesores')->withInput()->with('errors', 'Error al registrar: ' . implode(', ', $profesorModel->errors()));
         }
 
         // Si el guardado es exitoso, redirige a la lista de profesores con un mensaje de éxito.
-        return redirect()->to('/profesores')->with('success', 'Profesor registrado correctamente.');
+        return redirect()->to('/administrador/profesores')->with('success', 'Profesor registrado correctamente con legajo: ' . $legajo);
+    }
+
+    /**
+     * Método: assignMateria()
+     * Propósito: Asigna una materia a un profesor actualizando el campo materia_id.
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function assignMateria()
+    {
+        $profesorId = $this->request->getPost('profesor_id');
+        $materiaId = $this->request->getPost('materia_id');
+
+        if (!$profesorId || !$materiaId) {
+            return redirect()->to('/administrador/profesores')->with('error', 'Datos incompletos para asignar materia.');
+        }
+
+        $profesorModel = new ProfesorModel();
+        $materiaModel = new MateriaModel();
+
+        // Verificar que el profesor existe
+        $profesor = $profesorModel->find($profesorId);
+        if (!$profesor) {
+            return redirect()->to('/administrador/profesores')->with('error', 'Profesor no encontrado.');
+        }
+
+        // Verificar que la materia existe
+        $materia = $materiaModel->find($materiaId);
+        if (!$materia) {
+            return redirect()->to('/administrador/profesores')->with('error', 'Materia no encontrada.');
+        }
+
+        // Verificar que la materia no esté ya asignada a otro profesor
+        $profesorExistente = $profesorModel->where('materia_id', $materiaId)->first();
+        if ($profesorExistente && $profesorExistente['id'] != $profesorId) {
+            return redirect()->to('/administrador/profesores')->with('error', 'Esta materia ya está asignada a otro profesor.');
+        }
+
+        // Actualizar el profesor con la nueva materia
+        $data = ['materia_id' => $materiaId];
+        if ($profesorModel->update($profesorId, $data)) {
+            return redirect()->to('/administrador/profesores')->with('success', 'Materia asignada correctamente al profesor.');
+        } else {
+            return redirect()->to('/administrador/profesores')->with('error', 'Error al asignar la materia.');
+        }
+    }
+
+    /**
+     * Método: buscarProfesorPorNombre()
+     * Propósito: Busca un profesor por nombre para mostrar su legajo existente o generar uno nuevo.
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function buscarProfesorPorNombre()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['error' => 'Acceso no autorizado']);
+        }
+
+        $nombreProfesor = $this->request->getPost('nombre_profesor');
+        $profesorModel = new ProfesorModel();
+
+        // Buscar si el profesor ya existe
+        $profesorExistente = $profesorModel->where('nombre_profesor', $nombreProfesor)->first();
+
+        if ($profesorExistente) {
+            // Si existe, devolver el legajo existente y marcar como existente
+            return $this->response->setJSON([
+                'existe' => true,
+                'legajo' => $profesorExistente['legajo'],
+                'mensaje' => 'El profesor ya está registrado en el sistema.'
+            ]);
+        } else {
+            // Si no existe, generar un legajo nuevo
+            $legajoNuevo = $profesorModel->generarLegajo();
+            return $this->response->setJSON([
+                'existe' => false,
+                'legajo' => $legajoNuevo
+            ]);
+        }
     }
 
     /**
@@ -126,11 +217,11 @@ class Profesores extends BaseController
 
         // Intenta actualizar los datos. El modelo se encarga de la validación.
         if ($profesorModel->update($id, $data) === false) {
-            return redirect()->to('/profesores')->withInput()->with('errors', 'Error al actualizar: ' . implode(', ', $profesorModel->errors()));
+            return redirect()->to('/administrador/profesores')->withInput()->with('errors', 'Error al actualizar: ' . implode(', ', $profesorModel->errors()));
         }
 
         // Si la actualización es exitosa, redirige con un mensaje de éxito.
-        return redirect()->to('/profesores')->with('success', 'Profesor actualizado correctamente.');
+        return redirect()->to('/administrador/profesores')->with('success', 'Profesor actualizado correctamente.');
     }
 
     /**
