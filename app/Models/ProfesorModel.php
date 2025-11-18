@@ -13,11 +13,11 @@ class ProfesorModel extends Model
     // --- Propiedades de Configuración del Modelo ---
 
     // Especifica la tabla de la base de datos que este modelo representa.
-    protected $table      = 'Profesor';
+    protected $table      = 'profesor';
     // Especifica el nombre de la columna que es la clave primaria.
     protected $primaryKey = 'id';
     // Define los campos que se pueden insertar o actualizar masivamente.
-    protected $allowedFields = ['id', 'legajo', 'nombre_profesor', 'carrera_id'];
+    protected $allowedFields = ['id', 'legajo', 'nombre_profesor', 'materia_id'];
     // Desactiva los campos de timestamp automáticos ('created_at', 'updated_at').
     protected $useTimestamps = false;
     // Define el tipo de retorno como array para compatibilidad con la vista.
@@ -28,7 +28,7 @@ class ProfesorModel extends Model
         // 'id' no es requerido para la creación.
         'id' => 'permit_empty|integer', // Cambiado a permit_empty para permitir la creación
         // 'legajo' es obligatorio, debe ser un número entero único.
-        'legajo'   => 'required|integer|is_unique[Profesor.legajo,id,{id}]',
+        'legajo'   => 'required|integer|is_unique[profesor.legajo,id,{id}]',
         // 'nombre_profesor' es obligatorio, con una longitud entre 2 y 80 caracteres.
         'nombre_profesor'  => 'required|min_length[2]|max_length[80]',
     ];
@@ -54,9 +54,10 @@ class ProfesorModel extends Model
      */
     public function getProfesores()
     {
-        // Construye una consulta SELECT que une la tabla 'Profesor' con 'Carrera'.
-        return $this->select('Profesor.*, Carrera.nombre_carrera')
-            ->join('Carrera', 'Carrera.id = Profesor.carrera_id', 'left') // 'left' join para incluir profesores sin carrera.
+        // Construye una consulta SELECT que une la tabla 'Profesor' con 'Carrera' y 'Materia'.
+        return $this->select('profesor.*, materia.nombre_materia, carrera.nombre_carrera')
+            ->join('materia', 'materia.id = profesor.materia_id', 'left') // 'left' join para incluir profesores sin materia.
+            ->join('carrera', 'carrera.id = materia.carrera_id', 'left') // 'left' join para incluir materias sin carrera.
             ->findAll(); // Ejecuta la consulta y devuelve todos los resultados.
     }
 
@@ -89,9 +90,10 @@ class ProfesorModel extends Model
      */
     public function getProfesorConCarrera($id)
     {
-        // Construye la consulta para un solo registro con join a Carrera.
-        return $this->select('Profesor.*, Carrera.nombre_carrera')
-            ->join('Carrera', 'Carrera.id = Profesor.carrera_id', 'left')
+        // Construye la consulta para un solo registro con join a Materia y Carrera.
+        return $this->select('profesor.*, carrera.nombre_carrera')
+            ->join('materia', 'materia.id = profesor.materia_id', 'left')
+            ->join('carrera', 'carrera.id = materia.carrera_id', 'left')
             ->find($id); // Ejecuta la consulta y devuelve el registro que coincide con el ID.
     }
 
@@ -102,11 +104,14 @@ class ProfesorModel extends Model
      */
     public function getMateriasDictadas($id_prof)
     {
-        return $this->db->table('Profesor_Materia')
+        $profesor = $this->find($id_prof);
+        if (!$profesor || !$profesor['materia_id']) {
+            return [];
+        }
+        return $this->db->table('Materia')
             ->select('Materia.nombre_materia, Materia.codigo_materia, Materia.id, Materia.carrera_id, Carrera.nombre_carrera')
-            ->join('Materia', 'Materia.id = Profesor_Materia.materia_id')
             ->join('Carrera', 'Carrera.id = Materia.carrera_id')
-            ->where('Profesor_Materia.profesor_id', $id_prof)
+            ->where('Materia.id', $profesor['materia_id'])
             ->get()
             ->getResultArray();
     }
@@ -130,15 +135,17 @@ class ProfesorModel extends Model
         }
 
         // Promedio de calificaciones dadas (opcional, si hay notas)
-        $notas = $this->db->table('Nota')
-            ->select('AVG(calificacion) as promedio')
-            ->join('Materia', 'Materia.id = Nota.materia_id')
-            ->join('Profesor_Materia', 'Profesor_Materia.materia_id = Materia.id')
-            ->where('Profesor_Materia.profesor_id', $id_prof)
-            ->get()
-            ->getRowArray();
-
-        $promedio_calificaciones = $notas['promedio'] ?? 0;
+        $profesor = $this->find($id_prof);
+        if ($profesor && $profesor['materia_id']) {
+            $notas = $this->db->table('Nota')
+                ->select('AVG(calificacion) as promedio')
+                ->where('materia_id', $profesor['materia_id'])
+                ->get()
+                ->getRowArray();
+            $promedio_calificaciones = $notas['promedio'] ?? 0;
+        } else {
+            $promedio_calificaciones = 0;
+        }
 
         return [
             'total_materias' => $total_materias,
@@ -177,14 +184,16 @@ class ProfesorModel extends Model
      */
     public function getCarrerasDelProfesor($id_prof)
     {
-        return $this->db->table('Profesor_Materia')
+        $profesor = $this->find($id_prof);
+        if (!$profesor || !$profesor['materia_id']) {
+            return [];
+        }
+        return $this->db->table('Materia')
             ->select('carrera.id, carrera.nombre_carrera, carrera.codigo_carrera, categoria.nombre_categoria, modalidad.nombre_modalidad')
-            ->join('materia', 'materia.id = Profesor_Materia.materia_id')
             ->join('carrera', 'carrera.id = materia.carrera_id')
-            ->join('categoria', 'categoria.id = carrera.id_cat', 'left')
-            ->join('modalidad', 'modalidad.id = carrera.id_mod', 'left')
-            ->where('Profesor_Materia.profesor_id', $id_prof)
-            ->groupBy('Carrera.id')
+            ->join('categoria', 'categoria.id = carrera.categoria_id', 'left')
+            ->join('modalidad', 'modalidad.id = carrera.modalidad_id', 'left')
+            ->where('materia.id', $profesor['materia_id'])
             ->get()
             ->getResultArray();
     }
@@ -197,13 +206,16 @@ class ProfesorModel extends Model
      */
     public function getEstudiantesPorCarrera($carrera_id, $id_prof)
     {
+        $profesor = $this->find($id_prof);
+        if (!$profesor || !$profesor['materia_id']) {
+            return [];
+        }
         return $this->db->table('Inscripcion')
             ->select('Estudiante.id, Estudiante.nombre_estudiante, Estudiante.dni, Inscripcion.fecha_inscripcion, Inscripcion.estado_inscripcion')
             ->join('Estudiante', 'Estudiante.id = Inscripcion.estudiante_id')
             ->join('Materia', 'Materia.id = Inscripcion.materia_id')
-            ->join('Profesor_Materia', 'Profesor_Materia.materia_id = Materia.id')
             ->where('Materia.carrera_id', $carrera_id)
-            ->where('Profesor_Materia.profesor_id', $id_prof)
+            ->where('Materia.id', $profesor['materia_id'])
             ->groupBy('Estudiante.id')
             ->get()
             ->getResultArray();
@@ -238,5 +250,32 @@ class ProfesorModel extends Model
             ->orderBy('Asistencia.fecha', 'DESC')
             ->get()
             ->getResultArray();
+    }
+
+    /**
+     * Genera un legajo único para un nuevo profesor.
+     * El legajo es un número secuencial único que comienza desde 1001.
+     * @return string El legajo generado.
+     */
+    public function generarLegajo()
+    {
+        // Buscar el último legajo en la base de datos
+        $ultimoLegajo = $this->db->table('profesor')
+            ->select('legajo')
+            ->orderBy('legajo', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRowArray();
+
+        if ($ultimoLegajo) {
+            // Incrementar el último legajo en 1
+            $numero = (int) $ultimoLegajo['legajo'] + 1;
+        } else {
+            // Si no hay legajos, empezar desde 1001
+            $numero = 1001;
+        }
+
+        // Retornar el legajo como string
+        return (string) $numero;
     }
 }

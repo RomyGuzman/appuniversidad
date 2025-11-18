@@ -1,0 +1,15 @@
+la base de datos no se toca nunca . 
+nunca se hacen migraciones , 
+nunca se hacen seeders
+nunca se crean migraciones, 
+nunca se crean seeders
+
+siempre contestas en español 
+y antes de hacer algo me explicas lo que queres cambiar y porque 
+
+
+public string $baseURL = 'http://localhost/appuniversidad/public/';
+no se cambia nunca
+
+
+@app/agent.md esto siempre es el contexto 

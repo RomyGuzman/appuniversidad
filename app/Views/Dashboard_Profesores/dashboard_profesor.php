@@ -4,6 +4,42 @@
     Dashboard - <?= esc($profesor['nombre_profesor'] ?? 'Profesor') ?>
 <?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard de profesor cargado correctamente.');
+
+    // Verificar notificaciones al cargar la página
+    const notificaciones = <?= json_encode(session()->get('notificaciones') ?? []) ?>;
+    const usuarioId = <?= esc($profesor['id'] ?? 0) ?>;
+
+    // Filtrar notificaciones para este usuario
+    const notificacionesUsuario = notificaciones.filter(n => n.usuario_id == usuarioId && n.tipo === 'consulta_resuelta');
+
+    if (notificacionesUsuario.length > 0) {
+        // Mostrar la primera notificación (o la más reciente)
+        const notif = notificacionesUsuario[0];
+        Swal.fire({
+            icon: 'info',
+            title: notif.titulo,
+            text: notif.mensaje,
+            confirmButtonText: 'Aceptar'
+        });
+
+        // Limpiar notificaciones después de mostrar (eliminar de la sesión)
+        fetch('<?= base_url('notificaciones/limpiar') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ usuario_id: usuarioId })
+        }).catch(err => console.log('Error al limpiar notificaciones:', err));
+    }
+});
+</script>
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="row">
     <div class="col-12">

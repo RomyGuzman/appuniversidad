@@ -15,7 +15,7 @@ class Security extends BaseConfig
      *
      * @var string 'cookie' or 'session'
      */
-    public string $csrfProtection = 'cookie';
+    public string $csrfProtection = 'session';
 
     /**
      * --------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class Security extends BaseConfig
      *
      * Regenerate CSRF Token on every submission.
      */
-    public bool $regenerate = true;
+    public bool $regenerate = false;
 
     /**
      * --------------------------------------------------------------------------
@@ -83,4 +83,15 @@ class Security extends BaseConfig
      * @see https://codeigniter4.github.io/userguide/libraries/security.html#redirection-on-failure
      */
     public bool $redirect = (ENVIRONMENT === 'production');
+
+    /**
+     * --------------------------------------------------------------------
+     * CSRF Exclude URIs
+     * --------------------------------------------------------------------
+     *
+     * Set to ignore CSRF protection on the following URIs.
+     *
+     * @var array<int, string>
+     */
+    public array $excludeURIs = ['administrador/profesores', 'administrador/profesores/*', 'administrador/profesores'];
 }

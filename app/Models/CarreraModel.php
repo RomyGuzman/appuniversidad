@@ -12,12 +12,12 @@ class CarreraModel extends Model
     // --- Propiedades de Configuración del Modelo ---
 
     // Especifica la tabla de la base de datos que este modelo representa.
-    protected $table = 'carrera'; // Corregido a minúsculas por convención
+    protected $table = 'carrera';
     // Especifica el nombre de la columna que es la clave primaria de la tabla.
     protected $primaryKey = 'id';
     // Define los campos de la tabla que se pueden insertar o actualizar masivamente.
     // Es una medida de seguridad para prevenir ataques de "Mass Assignment".
-    protected $allowedFields = ['nombre_carrera', 'codigo_carrera', 'categoria_id', 'modalidad_id'];
+    protected $allowedFields = ['nombre_carrera', 'codigo_carrera', 'categoria_id', 'modalidad_id', 'duracion'];
     // Desactiva los campos de timestamp automáticos ('created_at', 'updated_at').
     protected $useTimestamps = false;
 
@@ -31,9 +31,9 @@ class CarreraModel extends Model
         'codigo_carrera' => 'required|min_length[2]|max_length[20]|is_unique[carrera.codigo_carrera,id,{id}]',
         // 'duracion' no es obligatorio, pero si se proporciona, debe ser un número natural mayor que cero y menor o igual a 12.
         'duracion'  => 'permit_empty|is_natural_no_zero|less_than_equal_to[12]', // CORREGIDO: La regla es less_than_equal_to
-        // 'id_modalidad' e 'id_categoria' no son obligatorios, pero deben ser enteros si se proporcionan.
-        'id_modalidad'    => 'permit_empty|integer',
-        'id_categoria'    => 'permit_empty|integer',
+        // 'modalidad_id' e 'categoria_id' no son obligatorios, pero deben ser enteros si se proporcionan.
+        'modalidad_id'    => 'permit_empty|integer',
+        'categoria_id'    => 'permit_empty|integer',
 
     ];
     // Define mensajes de error personalizados para las reglas de validación.
@@ -52,8 +52,10 @@ class CarreraModel extends Model
      */
     public function getCarrerasCompletas()
     {
-        // Temporalmente usar findAll() para verificar que se obtienen las carreras
-        return $this->findAll();
+        return $this->select('carrera.*, categoria.nombre_categoria, modalidad.nombre_modalidad')
+                    ->join('categoria', 'categoria.id = carrera.categoria_id', 'left')
+                    ->join('modalidad', 'modalidad.id = carrera.modalidad_id', 'left')
+                    ->findAll();
     }
 
     /**

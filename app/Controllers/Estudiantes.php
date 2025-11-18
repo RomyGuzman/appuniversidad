@@ -7,6 +7,10 @@ use App\Controllers\BaseController;
 use App\Models\EstudianteModel;
 use App\Models\CarreraModel;
 use App\Models\MateriaModel;
+use App\Models\InscripcionModel;
+use App\Models\UsuarioModel;
+// Importa la excepción de base de datos para manejar errores de duplicados.
+use \CodeIgniter\Database\Exceptions\DatabaseException;
 
 /**
  * Este es el "director de orquesta" para todo lo relacionado con los estudiantes.
@@ -74,10 +78,28 @@ class Estudiantes extends BaseController
             'carrera_id'        => $this->request->getPost('carrera_id') ?: null,
         ];
 
+        // Verificar si el DNI ya existe
+        $existingStudent = $estudianteModel->where('dni', $data['dni'])->first();
+        if ($existingStudent) {
+            return redirect()->to('/estudiantes')->withInput()->with('errors', ['El DNI ya existe en el sistema. No se puede registrar dos veces el mismo estudiante.']);
+        }
+
         // Intenta guardar los datos. El modelo se encarga de la validación.
-        if ($estudianteModel->save($data) === false) {
-            // Si la validación falla, redirige hacia atrás con los errores.
-            return redirect()->to('/estudiantes')->withInput()->with('errors', $estudianteModel->errors());
+        try {
+            if ($estudianteModel->save($data) === false) {
+                // Si la validación falla, redirige hacia atrás con los errores.
+                return redirect()->to('/estudiantes')->withInput()->with('errors', $estudianteModel->errors());
+            }
+        } catch (\CodeIgniter\Database\Exceptions\DatabaseException $e) {
+            // Si hay un error de duplicado en la base de datos, manejar específicamente
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false && strpos($e->getMessage(), 'dni') !== false) {
+                return redirect()->to('/estudiantes')->withInput()->with('errors', ['El DNI ya existe en el sistema. No se puede registrar dos veces el mismo estudiante.']);
+            }
+            // Para otros errores de base de datos, relanzar la excepción
+            throw $e;
+        } catch (\Exception $e) {
+            // Capturar cualquier otra excepción y mostrar mensaje genérico
+            return redirect()->to('/estudiantes')->withInput()->with('errors', ['Error al registrar el estudiante. Por favor, inténtelo de nuevo.']);
         }
 
         // Si el guardado es exitoso, redirige a la lista de estudiantes con un mensaje de éxito.
@@ -134,15 +156,38 @@ class Estudiantes extends BaseController
             'id'                => $id, // Para la regla de validación 'is_unique'
             'dni'               => $this->request->getPost('dni'),
             'nombre_estudiante' => $this->request->getPost('nest'), // CORRECCIÓN: Mapeo del campo 'nest' del formulario
-            'edad'              => $this->request->getPost('edad'),
             'email'             => $this->request->getPost('email'),
             'fecha_nacimiento'  => $this->request->getPost('fecha_nac') ?: null, // CORRECCIÓN: Mapeo del campo 'fecha_nac'
             'carrera_id'        => $this->request->getPost('id_car') ?: null, // CORRECCIÓN: Mapeo del campo 'id_car'
         ];
 
+        // Verificar si el DNI ya existe en otro estudiante (excluyendo el actual)
+        // Usar consulta directa para mayor robustez
+        $db = \Config\Database::connect();
+        $existingStudent = $db->table('estudiante')
+            ->where('dni', $data['dni'])
+            ->where('id !=', $id)
+            ->get()
+            ->getRow();
+
+        if ($existingStudent) {
+            return redirect()->to('/estudiantes')->withInput()->with('errors', ['El DNI ya existe en otro estudiante. No se puede actualizar con un DNI duplicado.']);
+        }
+
         // Intenta actualizar los datos. El modelo se encarga de la validación.
-        if ($estudianteModel->update($id, $data) === false) {
-            return redirect()->to('/estudiantes')->withInput()->with('errors', $estudianteModel->errors());
+        try {
+            if ($estudianteModel->update($id, $data) === false) {
+                return redirect()->to('/estudiantes')->withInput()->with('errors', $estudianteModel->errors());
+            }
+        } catch (\Throwable $e) {
+            // Capturar cualquier excepción, incluyendo DatabaseException y otras
+            $errorMessage = $e->getMessage();
+            if (strpos($errorMessage, 'Duplicate entry') !== false && strpos($errorMessage, 'dni') !== false) {
+                return redirect()->to('/estudiantes')->withInput()->with('errors', ['El DNI ya existe en el sistema. No se puede actualizar con un DNI duplicado.']);
+            }
+            // Para cualquier otro error, mostrar mensaje genérico sin romper la aplicación
+            log_message('error', 'Error al actualizar estudiante: ' . $errorMessage);
+            return redirect()->to('/estudiantes')->withInput()->with('errors', ['Error al actualizar el estudiante. Por favor, inténtelo de nuevo.']);
         }
 
         // Si la actualización es exitosa, redirige con un mensaje de éxito.
@@ -249,6 +294,90 @@ class Estudiantes extends BaseController
     }
 
     /**
+     * Método: inscribir()
+     * Propósito: Procesa la inscripción a una materia vía AJAX desde el dashboard.
+     * Tareas:
+     * 1. Verifica que sea una petición AJAX.
+     * 2. Obtiene el estudiante logueado.
+     * 3. Crea una nueva inscripción con estado 'Pendiente'.
+     * 4. Devuelve respuesta JSON con éxito o error.
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function inscribir()
+    {
+        log_message('info', '=== INICIO MÉTODO INSCRIBIR ===');
+
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['error' => 'Acceso no autorizado']);
+        }
+
+        // Verificar sesión
+        $email_usuario = session()->get('usuario');
+        if (!$email_usuario) {
+            return $this->response->setJSON(['error' => 'Sesión expirada']);
+        }
+
+        try {
+            $estudianteModel = new EstudianteModel();
+            $inscripcionModel = new InscripcionModel();
+
+            // Obtener estudiante
+            $estudiante = $estudianteModel->where('email', $email_usuario)->first();
+            if (!$estudiante) {
+                return $this->response->setJSON(['error' => 'Estudiante no encontrado']);
+            }
+
+            $estudianteId = $estudiante['id'];
+            $materiaId = $this->request->getPost('materia_id');
+
+            if (!$materiaId || !is_numeric($materiaId)) {
+                return $this->response->setJSON(['error' => 'Materia no especificada']);
+            }
+
+            // Verificar si ya existe una inscripción activa
+            $inscripcionExistente = $inscripcionModel->where('estudiante_id', $estudianteId)
+                                                    ->where('materia_id', $materiaId)
+                                                    ->whereIn('estado_inscripcion', ['Pendiente', 'Confirmada', 'Aprobada'])
+                                                    ->first();
+
+            if ($inscripcionExistente) {
+                return $this->response->setJSON(['error' => 'Ya estás inscrito en esta materia']);
+            }
+
+            // Crear nueva inscripción
+            $dataInscripcion = [
+                'estudiante_id' => $estudianteId,
+                'materia_id' => $materiaId,
+                'fecha_inscripcion' => date('Y-m-d'),
+                'estado_inscripcion' => 'Pendiente',
+                'observaciones_inscripcion' => 'Inscripción desde dashboard'
+            ];
+
+            $result = $inscripcionModel->insert($dataInscripcion);
+
+            if ($result) {
+                log_message('info', 'Inscripción creada correctamente con ID: ' . $result);
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Inscripción realizada correctamente'
+                ]);
+            } else {
+                $errors = $inscripcionModel->errors();
+                log_message('error', 'Errores de validación: ' . json_encode($errors));
+                return $this->response->setJSON([
+                    'error' => 'Error de validación: ' . implode(', ', $errors)
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'EXCEPCIÓN: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'error' => 'Error interno del servidor'
+            ]);
+        }
+    }
+
+    /**
      * Método: dashboard()
      * Propósito: Muestra el dashboard del estudiante con datos de la base de datos.
      * Nota: Si el estudiante está borrado lógicamente, redirige al login con error.
@@ -260,15 +389,23 @@ class Estudiantes extends BaseController
         // ¡SISTEMA DE LOGIN IMPLEMENTADO!
         // ==================================================================
         // Verificamos si el usuario ha iniciado sesión.
-        // La sesión 'id_usuario' corresponde al ID de la tabla 'usuarios'.
-        // Asumimos que para estudiantes, el id_usuario es el mismo que el id_est.
-        // Si tu lógica es diferente (ej: usuarios.id_persona -> estudiantes.id), ajústalo aquí.
-        if (! $id_est = session()->get('id_usuario')) {
+        // La sesión 'usuario' contiene el email del usuario logueado.
+        // Buscamos el estudiante por email en lugar de asumir que el ID de usuario es el ID de estudiante.
+        if (! $email_usuario = session()->get('usuario')) {
             return redirect()->to('/login')->with('error', 'Debe iniciar sesión para ver su dashboard.');
         }
 
         $estudianteModel = new EstudianteModel();
         $materiaModel = new MateriaModel();
+        $inscripcionModel = new InscripcionModel();
+
+        // Buscar el estudiante por email
+        $estudiante = $estudianteModel->where('email', $email_usuario)->first();
+        if (!$estudiante) {
+            return redirect()->to('/login')->with('error', 'No se encontró un estudiante asociado a su cuenta.');
+        }
+
+        $id_est = $estudiante['id'];
 
         $data['estudiante'] = $estudianteModel->getEstudianteConCarrera($id_est);
         // Si el estudiante está borrado, redirige al login.
@@ -284,7 +421,47 @@ class Estudiantes extends BaseController
         $data['materias_inscritas'] = $materias_inscritas;
         // Pasamos los datos al método para evitar consultas duplicadas
         $data['estadisticas'] = $estudianteModel->getEstadisticas($notas, $materias_inscritas);
- 
+
+        // NUEVO: Obtener todas las materias de la carrera para determinar estados dinámicos
+        $todasMaterias = $materiaModel->where('carrera_id', $estudiante['carrera_id'])->findAll();
+
+        // NUEVO: Para cada materia, determinar estado dinámico
+        $materiasDisponibles = [];
+        foreach ($todasMaterias as $materia) {
+            $ultimaInscripcion = $inscripcionModel->getUltimaInscripcion($estudiante['id'], $materia['id']);
+
+            if (!$ultimaInscripcion) {
+                // Nunca se inscribió
+                $materia['estado'] = 'inscribirme';
+                $materia['boton_texto'] = 'Inscribirme';
+                $materia['boton_clase'] = 'btn-primary';
+                $materia['clickeable'] = true;
+            } elseif ($ultimaInscripcion['estado_inscripcion'] == 'Reprobada') {
+                // Reprobó anteriormente
+                $materia['estado'] = 'no_curso';
+                $materia['boton_texto'] = 'No la curso - Reintentar';
+                $materia['boton_clase'] = 'btn-warning';
+                $materia['clickeable'] = true;
+            } elseif (in_array($ultimaInscripcion['estado_inscripcion'], ['Pendiente', 'Confirmada', 'Aprobada'])) {
+                // Está cursando o aprobó
+                $materia['estado'] = 'ya_inscrito';
+                $materia['boton_texto'] = 'Ya inscrito';
+                $materia['boton_clase'] = 'btn-secondary';
+                $materia['clickeable'] = false;
+            } else {
+                // Otro estado
+                $materia['estado'] = 'inscribirme';
+                $materia['boton_texto'] = 'Inscribirme';
+                $materia['boton_clase'] = 'btn-primary';
+                $materia['clickeable'] = true;
+            }
+
+            $materiasDisponibles[] = $materia;
+        }
+
+        // NUEVO: Agregar al array data
+        $data['materias_disponibles'] = $materiasDisponibles;
+
         // Preparamos arrays para los datos adicionales.
         $data['materiales_por_materia'] = [];
         $data['asistencias_por_materia'] = [];

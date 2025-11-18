@@ -34,13 +34,12 @@ class ConsultasAdmin extends BaseController
     }
 
     /**
-     * Marca una consulta como 'resuelta'.
-     * Diseñado para ser llamado vía AJAX.
+     * Marca una consulta como 'respondida' en la base de datos.
      * @param int $id El ID de la consulta a actualizar.
      */
     public function markAsRead($id = null)
     {
-        if ($this->request->isAJAX() && $id) {
+        if ($id) {
             $consultaModel = new ConsultaAdminModel();
             $consulta = $consultaModel->find($id);
 
@@ -48,12 +47,12 @@ class ConsultasAdmin extends BaseController
                 // Devuelve una respuesta exitosa con el nuevo token CSRF. El JS se encargará de actualizar el contador.
                 return $this->response->setJSON([
                     'success' => true,
-                    'message' => 'Consulta marcada como resuelta.',
+                    'message' => 'Consulta marcada como respondida.',
                     'csrf_hash' => csrf_hash()
                 ]);
             }
 
-            return $this->response->setJSON(['success' => false, 'message' => 'No se pudo actualizar o encontrar la consulta.']);
+            return $this->response->setJSON(['success' => false, 'message' => 'No se pudo actualizar la consulta.']);
         }
 
         return $this->response->setStatusCode(403);

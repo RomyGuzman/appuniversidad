@@ -67,12 +67,15 @@ $routes->group('administrador', ['filter' => 'admin'], static function ($routes)
 
     // --- Gestión de Profesores ---
     $routes->get('profesores', 'Profesores::index');
+    $routes->post('profesores', 'Profesores::create');
+    $routes->post('profesores/buscarProfesorPorNombre', 'Profesores::buscarProfesorPorNombre');
     $routes->post('profesores/store', 'Profesores::store');
     $routes->get('profesores/edit/(:num)', 'Profesores::edit/$1');
     $routes->post('profesores/update/(:num)', 'Profesores::update/$1');
     $routes->post('profesores/delete/(:num)', 'Profesores::delete/$1');
     $routes->get('profesores/search/(:num)', 'Profesores::search/$1');
     $routes->get('profesores/searchByLegajo/(:any)', 'Profesores::searchByLegajo/$1');
+    $routes->post('profesores/assign-materia', 'Profesores::assignMateria');
 
     // --- Gestión de Carreras ---
     $routes->get('carreras', 'RegistrarCarrera::index');
@@ -94,7 +97,12 @@ $routes->group('administrador', ['filter' => 'admin'], static function ($routes)
 
     // --- Gestión de Materias ---
     $routes->get('materias', 'Materias::index');
+    $routes->post('materias/registrar', 'Materias::registrar');
     $routes->post('materias/store', 'Materias::store');
+    $routes->get('materias/edit/(:num)', 'Materias::edit/$1');
+    $routes->post('materias/update/(:num)', 'Materias::update/$1');
+    $routes->post('materias/delete/(:num)', 'Materias::delete/$1');
+    $routes->get('materias/search/(:num)', 'Materias::search/$1');
     $routes->get('materias/generar-codigo/(:any)', 'Materias::generarCodigo/$1');
 
     // --- Gestión de Modalidades ---
@@ -115,7 +123,7 @@ $routes->group('administrador', ['filter' => 'admin'], static function ($routes)
 
     // --- Sistema de Alertas (Consultas) ---
     $routes->get('alertas', 'ConsultasAdmin::index');
-    $routes->get('alertas/count', 'ConsultasAdmin::countUnread');
+    $routes->get('alertas/count', 'ConsultasAdmin::getUnreadCount');
     $routes->post('alertas/mark-as-read/(:num)', 'ConsultasAdmin::markAsRead/$1');
 });
 
@@ -146,6 +154,9 @@ $routes->group('estudiantes', static function ($routes) {
     // $routes->post('restore/(:num)', 'Estudiantes::restore/$1'); // Opcional: si estudiantes pueden restaurar su propio perfil, pero mejor dejarlo en admin
     $routes->get('search/(:num)', 'Estudiantes::search/$1');
     $routes->get('search/carrera/(:num)', 'Estudiantes::searchByCareer/$1');
+
+    // NUEVO: Ruta para inscripción AJAX (sin filtros CSRF)
+    $routes->post('inscribir', 'Estudiantes::inscribir');
 });
 
 // --- RUTAS PARA API (si las usas para poblar selects, etc.) ---
@@ -155,5 +166,13 @@ $routes->group('api', static function ($routes) {
     $routes->get('get_modalidades', 'ApiController::getModalidades');
 });
 
+// --- RUTA PARA CARRERAS (REDIRECCIÓN DESDE ADMINISTRADOR) ---
+$routes->get('carreras', 'RegistrarCarrera::index');
+
 // --- RUTA PARA ENVIAR CONSULTAS ---
 $routes->post('consultas/enviar', 'Consultas::enviar');
+
+// --- RUTA PARA LIMPIAR NOTIFICACIONES ---
+$routes->post('notificaciones/limpiar', 'Notificaciones::limpiar');
+
+

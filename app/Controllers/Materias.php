@@ -44,12 +44,23 @@ class Materias extends BaseController
     public function registrar()
     {
         $nombreMateria = $this->request->getPost('nombre_materia');
+        $carreraId = $this->request->getPost('carrera_id');
+
+        // Verificar si la materia ya existe para la misma carrera
+        $materiaExistente = $this->materiaModel->where('nombre_materia', $nombreMateria)
+                                               ->where('carrera_id', $carreraId)
+                                               ->first();
+
+        if ($materiaExistente) {
+            return redirect()->back()->withInput()->with('error', 'La materia ya existe para esta carrera.');
+        }
+
         $codigoGenerado = $this->generarCodigoMateria($nombreMateria);
 
         $data = [
             'nombre_materia' => $nombreMateria,
             'codigo_materia' => $codigoGenerado,
-            'carrera_id' => $this->request->getPost('carrera_id'),
+            'carrera_id' => $carreraId,
         ];
 
         if ($this->materiaModel->insert($data)) {

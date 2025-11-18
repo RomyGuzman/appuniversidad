@@ -114,7 +114,7 @@ class RegistrarCarrera extends BaseController
     public function edit($id)
     {
         $model = new CarreraModel();
-        $carrera = $model->find($id);
+        $carrera = $model->getCarreraCompleta($id);
 
         // Verifica si la petición es de tipo AJAX.
         if ($this->request->isAJAX()) {

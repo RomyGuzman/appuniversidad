@@ -145,9 +145,9 @@
               <table class="table table-hover align-middle table-striped" id="careersTable">
                 <thead class="table-dark">
                   <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
                     <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -156,9 +156,9 @@
                         <?php foreach($carreras as $car): ?>
                             <!-- CORRECCIÓN: Se usan los nombres de columna correctos de la BD ('id', 'nombre_carrera') -->
                             <tr>
-                                <td><?= esc($car['id']) ?></td>
-                                <td><?= esc($car['nombre_carrera']) ?></td>
                                 <td><?= esc($car['codigo_carrera']) ?></td>
+                                <td><?= esc($car['nombre_carrera']) ?></td>
+                                <td><?= esc($car['nombre_categoria']) ?></td>
                                  <td>
                                     <button class="btn btn-warning btn-sm edit-car-btn" data-id="<?= esc($car['id']) ?>" data-bs-toggle="modal" data-bs-target="#editCareerModal">
                                         <i class="fas fa-pencil-alt"></i>
