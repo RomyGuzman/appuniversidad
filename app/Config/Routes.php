@@ -60,6 +60,8 @@ $routes->group('administrador', ['filter' => 'admin'], static function ($routes)
     $routes->get('estudiantes/edit/(:num)', 'Estudiantes::edit/$1');
     $routes->post('estudiantes/update/(:num)', 'Estudiantes::update/$1');
     $routes->post('estudiantes/delete/(:num)', 'Estudiantes::delete/$1');
+    // Nueva ruta para restaurar estudiantes borrados (soft delete)
+    $routes->post('estudiantes/restore/(:num)', 'Estudiantes::restore/$1');
     $routes->get('estudiantes/search/(:num)', 'Estudiantes::search/$1');
     $routes->get('estudiantes/search/carrera/(:num)', 'Estudiantes::searchByCareer/$1');
 
@@ -148,6 +150,8 @@ $routes->group('estudiantes', static function ($routes) {
     $routes->get('edit/(:num)', 'Estudiantes::edit/$1');
     $routes->post('update/(:num)', 'Estudiantes::update/$1');
     $routes->post('delete/(:num)', 'Estudiantes::delete/$1');
+    // Nueva ruta para restaurar estudiantes borrados (soft delete) - Solo para admins, pero si quieres permitirlo aquí, ajústalo
+    // $routes->post('restore/(:num)', 'Estudiantes::restore/$1'); // Opcional: si estudiantes pueden restaurar su propio perfil, pero mejor dejarlo en admin
     $routes->get('search/(:num)', 'Estudiantes::search/$1');
     $routes->get('search/carrera/(:num)', 'Estudiantes::searchByCareer/$1');
 

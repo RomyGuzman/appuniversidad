@@ -2,14 +2,23 @@
 
 // Define el espacio de nombres para organizar la clase.
 namespace App\Models;
+
 // Importa la clase base 'Model' de CodeIgniter.
 use CodeIgniter\Model;
+
+// Importa el trait para soft delete (borrado lógico).
+use CodeIgniter\Model\SoftDeleteTrait;
+
 /**
  * Modelo para interactuar con la tabla 'Estudiante'.
  * Define los campos permitidos, reglas de validación y métodos personalizados.
+ * Incluye soft delete para marcar registros como borrados sin eliminarlos físicamente.
  */
 class EstudianteModel extends Model
 {
+    // Usa el trait SoftDeleteTrait para habilitar el borrado lógico.
+    use SoftDeleteTrait;
+
     // --- Propiedades de Configuración del Modelo ---
 
     // Especifica la tabla de la base de datos que este modelo representa.
@@ -20,6 +29,8 @@ class EstudianteModel extends Model
     protected $allowedFields = ['id', 'dni','nombre_estudiante','fecha_nacimiento','email','carrera_id'];
     // Desactiva los campos de timestamp automáticos ('created_at', 'updated_at').
     protected $useTimestamps = false;
+    // Especifica el campo para soft delete (debe coincidir con el nombre en la BD).
+    protected $deletedField = 'deleted_at';
 
     // Define las reglas de validación que se aplicarán antes de guardar o actualizar.
     protected $validationRules = [
@@ -54,6 +65,7 @@ class EstudianteModel extends Model
      * Obtiene todos los estudiantes junto con el nombre de su carrera.
      * Utiliza un 'left join' para asegurar que se muestren todos los estudiantes,
      * incluso aquellos que no están inscritos en ninguna carrera.
+     * Nota: Con soft delete, solo se devuelven estudiantes no borrados (deleted_at IS NULL).
      * @return array
      */
     public function getEstudiantesConCarrera()
@@ -66,8 +78,9 @@ class EstudianteModel extends Model
 
     /**
      * Obtiene un estudiante específico por ID, junto con el nombre de su carrera.
+     * Nota: Si el estudiante está borrado lógicamente, devolverá null.
      * @param int $id El ID del estudiante.
-     * @return array|object|null Devuelve el estudiante o null si no se encuentra.
+     * @return array|object|null Devuelve el estudiante o null si no se encuentra o está borrado.
      */
     public function getEstudianteConCarrera($id)
     {
@@ -79,6 +92,7 @@ class EstudianteModel extends Model
 
     /**
      * Obtiene todos los estudiantes de una carrera específica.
+     * Nota: Solo incluye estudiantes no borrados lógicamente.
      * @param int $careerId El ID de la carrera.
      * @return array Devuelve un array de estudiantes.
      */
@@ -93,6 +107,7 @@ class EstudianteModel extends Model
 
     /**
      * Obtiene las notas de un estudiante específico.
+     * Nota: Para mantener consistencia con soft delete, considera filtrar notas no borradas si aplica.
      * @param int $id_est El ID del estudiante.
      * @return array Devuelve un array de notas con información de la materia.
      */
@@ -108,6 +123,7 @@ class EstudianteModel extends Model
 
     /**
      * Obtiene las materias inscritas de un estudiante específico.
+     * Nota: Para mantener consistencia con soft delete, considera filtrar inscripciones no borradas si aplica.
      * @param int $id_est El ID del estudiante.
      * @return array Devuelve un array de inscripciones con información de la materia.
      */
@@ -160,48 +176,49 @@ class EstudianteModel extends Model
 
     /**
      * Obtiene las asistencias individuales de un estudiante para una materia específica.
-     *
+     * Nota: Para mantener consistencia con soft delete, considera filtrar asistencias no borradas si aplica.
      * @param int $inscripcion_id ID de la inscripción (conecta estudiante y materia).
      * @return array Lista de asistencias con fecha y estado.
      */
     public function getAsistenciasIndividuales($inscripcion_id)
     {
-        return $this->db->table('asistencia')
-            ->where('inscripcion_id', $inscripcion_id)
+        // Cambié a usar el modelo de Asistencia para respetar soft delete si está implementado allí.
+        // Si AsistenciaModel tiene soft delete, esto excluirá asistencias borradas.
+        $asistenciaModel = new \App\Models\AsistenciaModel();
+        return $asistenciaModel->where('inscripcion_id', $inscripcion_id)
             ->select('fecha, estado')
             ->orderBy('fecha', 'ASC')
-            ->get()
-            ->getResultArray();
+            ->findAll();
     }
 
     /**
      * Obtiene y calcula los datos de asistencia de un estudiante para una materia específica.
-     *
+     * Nota: Para mantener consistencia con soft delete, considera filtrar asistencias no borradas si aplica.
      * @param int $inscripcion_id ID de la inscripción (conecta estudiante y materia).
      * @return array|null Datos calculados de asistencia o null si no se encuentra.
      */
     public function getDatosAsistencia($inscripcion_id)
     {
         // Paso 1: Obtener la inscripción y los datos de la materia.
-        // Se eliminan las columnas que no existen para evitar el error.
-        $inscripcion = $this->db->table('inscripcion i')
-            ->join('materia m', 'm.id = i.materia_id')
-            ->where('i.id', $inscripcion_id)
-            ->select('i.id as inscripcion_id, m.id as materia_id, m.nombre_materia')
-            ->get()->getRowArray();
+        // Usamos el modelo de Inscripcion para respetar soft delete.
+        $inscripcionModel = new \App\Models\InscripcionModel();
+        $inscripcion = $inscripcionModel->join('materia m', 'm.id = Inscripcion.materia_id')
+            ->where('Inscripcion.id', $inscripcion_id)
+            ->select('Inscripcion.id as inscripcion_id, m.id as materia_id, m.nombre_materia')
+            ->first();
 
         if (!$inscripcion) {
-            return null; // Si no hay inscripción, no hay nada que calcular.
+            return null; // Si no hay inscripción o está borrada, no hay nada que calcular.
         }
 
         // Paso 2: Contar las asistencias del estudiante.
-        // Se usan los estados 'Presente', 'Ausente' según tu base de datos.
-        $asistencias = $this->db->table('asistencia')
-            ->where('inscripcion_id', $inscripcion_id)
+        // Usamos el modelo de Asistencia para respetar soft delete.
+        $asistenciaModel = new \App\Models\AsistenciaModel();
+        $asistencias = $asistenciaModel->where('inscripcion_id', $inscripcion_id)
             ->select("COUNT(CASE WHEN estado = 'presente' THEN 1 END) as presentes")
             ->select("COUNT(CASE WHEN estado = 'ausente' THEN 1 END) as ausentes")
             ->select("COUNT(CASE WHEN estado = 'justificado' THEN 1 END) as justificados")
-            ->get()->getRowArray();
+            ->first();
 
         $total_clases_registradas = ($asistencias['presentes'] ?? 0) + ($asistencias['ausentes'] ?? 0);
         $faltas_totales = $asistencias['ausentes'] ?? 0;

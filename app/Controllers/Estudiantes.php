@@ -16,6 +16,7 @@ use \CodeIgniter\Database\Exceptions\DatabaseException;
  * Este es el "director de orquesta" para todo lo relacionado con los estudiantes.
  * Cada método público corresponde a una acción que el usuario puede realizar,
  * como ver la lista, registrar uno nuevo, editar, etc.
+ * Ahora incluye soporte para soft delete (borrado lógico) en el modelo EstudianteModel.
  */
 class Estudiantes extends BaseController
 {
@@ -26,6 +27,7 @@ class Estudiantes extends BaseController
      * 2. Pide al modelo de Estudiantes la lista completa (con el nombre de la carrera).
      * 3. Pide al modelo de Carreras todas las carreras disponibles (para los menús desplegables).
      * 4. Pasa todos estos datos a la vista 'estudiantes.php' para que los muestre.
+     * Nota: Con soft delete, solo se muestran estudiantes no borrados (deleted_at IS NULL).
      * @return string La vista renderizada.
      */
     public function index()
@@ -111,6 +113,7 @@ class Estudiantes extends BaseController
      * 2. Busca al estudiante por el ID proporcionado.
      * 3. Devuelve los datos del estudiante en formato JSON para que JavaScript pueda
      *    rellenar el formulario del modal de edición.
+     * Nota: Con soft delete, si el estudiante está borrado, devolverá null y error 404.
      * @param int $id El ID del estudiante.
      */
     public function edit($id)
@@ -124,7 +127,7 @@ class Estudiantes extends BaseController
                 // Si se encuentra el estudiante, devuelve sus datos como una respuesta JSON.
                 return $this->response->setJSON($estudiante);
             } else {
-                // Si no se encuentra, devuelve un error 404 (No Encontrado) con un mensaje.
+                // Si no se encuentra (o está borrado lógicamente), devuelve un error 404 (No Encontrado) con un mensaje.
                 return $this->response->setStatusCode(404)->setJSON(['error' => 'Estudiante no encontrado']);
             }
         }
@@ -140,6 +143,7 @@ class Estudiantes extends BaseController
      * 2. Llama al método `update()` del modelo, pasándole el ID del estudiante a modificar y los nuevos datos.
      *    Este método también ejecuta las validaciones.
      * 3. Redirige a la página de estudiantes con un mensaje de éxito o error.
+     * Nota: Si el estudiante está borrado lógicamente, update() no lo encontrará y fallará.
      * @param int $id El ID del estudiante a actualizar.
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
@@ -192,22 +196,45 @@ class Estudiantes extends BaseController
 
     /**
      * Método: delete($id)
-     * Propósito: Elimina un estudiante de la base de datos.
+     * Propósito: Marca un estudiante como borrado lógicamente (soft delete).
      * Tareas:
-     * 1. Llama al método `delete()` del modelo, pasándole el ID del estudiante a eliminar.
+     * 1. Llama al método `delete()` del modelo, pasándole el ID del estudiante a "eliminar".
+     *    Con soft delete, esto establece deleted_at en lugar de eliminar físicamente.
      * 2. Redirige a la página de estudiantes con un mensaje de confirmación.
-     * @param int $id El ID del estudiante a eliminar.
+     * Nota: Solo usuarios autorizados (e.g., admin) deberían poder acceder a esto.
+     * @param int $id El ID del estudiante a marcar como borrado.
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function delete($id)
     {
         $estudianteModel = new EstudianteModel();
-        // Intenta eliminar el registro.
+        // Intenta marcar como borrado lógicamente.
         if ($estudianteModel->delete($id)) {
-            return redirect()->to('/estudiantes')->with('success', 'Estudiante eliminado correctamente.');
+            return redirect()->to('/estudiantes')->with('success', 'Estudiante marcado como borrado correctamente.');
         } else {
             // Si por alguna razón falla (ej: un callback del modelo lo impide), redirige con un error.
-            return redirect()->to('/estudiantes')->with('error', 'No se pudo eliminar al estudiante.');
+            return redirect()->to('/estudiantes')->with('error', 'No se pudo marcar al estudiante como borrado.');
+        }
+    }
+
+    /**
+     * Método: restore($id)
+     * Propósito: Restaura un estudiante marcado como borrado lógicamente.
+     * Tareas:
+     * 1. Llama al método `restore()` del modelo para quitar el flag deleted_at.
+     * 2. Redirige con mensaje de éxito o error.
+     * Nota: Solo para usuarios autorizados (e.g., superadmin).
+     * @param int $id El ID del estudiante a restaurar.
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function restore($id)
+    {
+        $estudianteModel = new EstudianteModel();
+        // Intenta restaurar el estudiante.
+        if ($estudianteModel->restore($id)) {
+            return redirect()->to('/estudiantes')->with('success', 'Estudiante restaurado correctamente.');
+        } else {
+            return redirect()->to('/estudiantes')->with('error', 'No se pudo restaurar al estudiante.');
         }
     }
 
@@ -218,6 +245,7 @@ class Estudiantes extends BaseController
      * 1. Responde a una petición AJAX desde el formulario "Buscar por ID".
      * 2. Usa un método personalizado del modelo para obtener el estudiante y el nombre de su carrera.
      * 3. Devuelve los datos en formato JSON.
+     * Nota: Con soft delete, si está borrado, devolverá null y error 404.
      * @param int $id El ID del estudiante a buscar.
      * @return \CodeIgniter\HTTP\ResponseInterface|void
      */
@@ -246,6 +274,7 @@ class Estudiantes extends BaseController
      * 1. Responde a una petición AJAX desde el formulario "Buscar por Carrera".
      * 2. Usa un método personalizado del modelo para obtener la lista de estudiantes.
      * 3. Devuelve la lista en formato JSON para que JavaScript la muestre.
+     * Nota: Solo incluye estudiantes no borrados.
      * @param int $careerId El ID de la carrera.
      * @return \CodeIgniter\HTTP\ResponseInterface|\CodeIgniter\HTTP\RedirectResponse
      */
@@ -351,6 +380,7 @@ class Estudiantes extends BaseController
     /**
      * Método: dashboard()
      * Propósito: Muestra el dashboard del estudiante con datos de la base de datos.
+     * Nota: Si el estudiante está borrado lógicamente, redirige al login con error.
      * @return string La vista renderizada.
      */
     public function dashboard()
@@ -378,6 +408,11 @@ class Estudiantes extends BaseController
         $id_est = $estudiante['id'];
 
         $data['estudiante'] = $estudianteModel->getEstudianteConCarrera($id_est);
+        // Si el estudiante está borrado, redirige al login.
+        if (!$data['estudiante']) {
+            return redirect()->to('/login')->with('error', 'Su cuenta ha sido desactivada.');
+        }
+
         // Obtenemos los datos una sola vez
         $notas = $estudianteModel->getNotas($id_est);
         $materias_inscritas = $estudianteModel->getMateriasInscritas($id_est);
